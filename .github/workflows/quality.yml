@@ -1,0 +1,36 @@
+name: Quality checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check JavaScript syntax
+        run: node --check app.js
+
+      - name: Verify application script is externalized
+        run: |
+          grep -q '<script src="app.js" defer></script>' index.html
+          if grep -q 'function advisorLogin' index.html; then
+            echo "Application JavaScript must not be duplicated inline in index.html."
+            exit 1
+          fi
+
+      - name: Verify required project documentation
+        run: |
+          test -f README.md
+          test -f SECURITY.md
+          test -f DECISIONS.md
+          test -f docs/PRODUCTION_READINESS.md
