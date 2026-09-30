@@ -46,3 +46,20 @@ Ce fichier garde la trace du **pourquoi** des choix importants afin d'éviter qu
 - **Décision :** les changements structurants passent par des branches dédiées et doivent pouvoir être relus avant fusion sur `main`.
 - **Pourquoi :** réduire les régressions et distinguer clairement expérimentation et version déployable.
 - **Conséquences :** CI, tests, sécurité et documentation deviennent des exigences du projet.
+
+## ADR-005 — La V0.16 est la baseline fonctionnelle à restaurer
+- **Date :** 2026-09-30
+- **Statut :** accepté
+- **Contexte :** le dépôt GitHub a été initialisé avec une version V0.9 alors qu'une V0.16 plus avancée existe dans les fichiers de travail.
+- **Décision :** ne pas refactoriser la V0.9 comme source fonctionnelle finale. Restaurer la V0.16 dans Git avant la réécriture structurelle.
+- **Pourquoi :** la V0.16 contient des évolutions déjà validées : taxonomie de compétences, base métier étendue, recherche, filtres, impression conseiller et scoring recalibré.
+- **Conséquences :** toute refonte doit préserver les comportements validés de la V0.16 ou documenter explicitement leur remplacement.
+
+## ADR-006 — Cible du 7 octobre 2026
+- **Date :** 2026-09-30
+- **Statut :** accepté
+- **Contexte :** le projet doit être présenté le 7 octobre 2026.
+- **Décision :** viser une Release Candidate de démonstration fonctionnelle et techniquement vendable, sans prétendre à une mise en exploitation complète.
+- **Pourquoi :** concentrer le temps disponible sur la stabilité, la crédibilité technique, la sécurité de base, l'explicabilité et la démonstration.
+- **Conséquences :** aucune fonctionnalité majeure hors périmètre ne doit mettre en danger la RC. Le passage d'une étape journalière à la suivante est signalé explicitement avant de poursuivre.
+
