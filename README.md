@@ -24,6 +24,7 @@ assets/
     app.css
   js/
     catalog.js
+    skills-taxonomy.js
     matching-engine.js
     app.js
 tests/
@@ -31,6 +32,7 @@ tests/
 ```
 
 - `catalog.js` contient les référentiels et données de démonstration.
+- `skills-taxonomy.js` contient la couche UX de 15 catégories, 167 macro-compétences et 668 précisions recherchables.
 - `matching-engine.js` contient le moteur de compatibilité et les calculs d'indicateurs.
 - `app.js` contient l'interface, les exports et les mécanismes spécifiques à la démo.
 - `app.css` contient la présentation.
@@ -49,6 +51,7 @@ Puis ouvrir `http://localhost:8000`.
 
 ```bash
 node --check assets/js/catalog.js
+node --check assets/js/skills-taxonomy.js
 node --check assets/js/matching-engine.js
 node --check assets/js/app.js
 node --test tests/matching-engine.test.js
@@ -70,3 +73,15 @@ Voir également :
 - [DECISIONS.md](DECISIONS.md)
 - [docs/PREFLIGHT_AUDIT.md](docs/PREFLIGHT_AUDIT.md)
 - [docs/PRODUCTION_READINESS.md](docs/PRODUCTION_READINESS.md)
+
+
+## Référentiel de compétences
+
+Le ROME 4.0 de France Travail contient un référentiel beaucoup plus vaste (notamment plus de 21 000 savoir-faire). La démonstration ne présente pas cette liste brute à l'utilisateur.
+
+JusteCap utilise une couche UX compacte :
+- 15 catégories ;
+- 167 macro-compétences sélectionnables ;
+- 668 précisions et exemples recherchables.
+
+Cette couche sert à rendre la sélection exploitable et à calculer des proximités. Elle ne doit pas être présentée comme une copie exhaustive du référentiel ROME.
