@@ -92,9 +92,7 @@ const institutions = [
   {id:"enefa-caen",name:"Enefa - Caen",advisors:[
     {id:"demo-advisor",firstName:"Conseiller",lastName:"Démo",login:"conseiller.demo"}
   ]},
-  {id:"structure-demo-lisieux",name:"Structure Démo - Lisieux",advisors:[
-    {id:"marie-dupont",firstName:"Marie",lastName:"Dupont",login:"marie.dupont"}
-  ]}
+  {id:"structure-demo-lisieux",name:"Structure Démo - Lisieux",advisors:[]}
 ];
 const territoryData = {
   normandie:{name:"Normandie",departments:{
