@@ -343,7 +343,9 @@ function renderJobs(){
                 <li>Bonus expérience de travail : <strong>+${j.match.experienceBonus}</strong></li>
                 <li>Bonus qualités : <strong>+${j.match.qualityBonus}</strong></li>
                 <li>Impact points de vigilance : <strong>-${j.match.defectPenalty}</strong></li>
+                ${j.match.accessPenalty?`<li>Contraintes d\'accès : <strong>-${j.match.accessPenalty}</strong></li>`:""}
                 <li>Impact handicap / limitations : <strong>-${j.match.accessibilityPenalty}</strong></li>
+                ${j.match.accessReasons?.length?j.match.accessReasons.map(x=>`<li>${esc(x)}</li>`).join(""):""}
               </ul>
               ${j.match.accessibility.hard.length||j.match.accessibility.warnings.length?`<div class="accessibility-note ${j.match.accessibility.blocked?"accessibility-blocked":""}">
                 <strong>${j.match.accessibility.label}</strong>
