@@ -131,6 +131,7 @@ function stableSkillHash(str){
 }
 
 function jobMacroRequirements(job){
+  if(Array.isArray(job.skillMacroIds) && job.skillMacroIds.length) return job.skillMacroIds;
   if(job._macroReq) return job._macroReq;
   const out=[];
   (job.skills||[]).forEach(base=>{
