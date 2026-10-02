@@ -89,49 +89,48 @@ const prefValues = [
 ];
 
 const institutions = [
-  {id:"enefa-caen",name:"Enefa - Caen",advisors:[
+  {id:"enefa-herouville",name:"ENEFA - Hérouville-Saint-Clair",advisors:[
     {id:"demo-advisor",firstName:"Conseiller",lastName:"Démo",login:"conseiller.demo"}
-  ]},
-  {id:"structure-demo-lisieux",name:"Structure Démo - Lisieux",advisors:[]}
+  ]}
 ];
 const territoryData = {
   normandie:{name:"Normandie",departments:{
     "14":{name:"Calvados",basins:[
-      {id:"bayeux",name:"Bayeux",projects:2736,difficulty:46,seasonal:51,propensity:28.3,change:-12.9},
-      {id:"caen",name:"Caen",projects:16006,difficulty:43,seasonal:30,propensity:25.0,change:-13.2},
-      {id:"falaise",name:"Falaise",projects:914,difficulty:45,seasonal:47,propensity:18.6,change:-9.2},
-      {id:"lisieux",name:"Lisieux",projects:6210,difficulty:41,seasonal:47,propensity:26.6,change:-22.3},
-      {id:"vire",name:"Vire",projects:1300,difficulty:46,seasonal:31,propensity:18.1,change:-9.3}
+      {id:"bayeux",name:"Bayeux",projects:2740,difficulty:46.0,seasonal:50.4,change:-12.7},
+      {id:"caen",name:"Caen",projects:16010,difficulty:43.2,seasonal:30.3,change:-13.1},
+      {id:"falaise",name:"Falaise",projects:910,difficulty:45.1,seasonal:47.3,change:-9.9},
+      {id:"lisieux",name:"Lisieux",projects:6210,difficulty:41.4,seasonal:47.5,change:-22.4},
+      {id:"vire",name:"Vire",projects:1300,difficulty:46.2,seasonal:30.8,change:-9.1}
     ]},
     "27":{name:"Eure",basins:[
-      {id:"bernay",name:"Bernay",projects:1361,difficulty:44,seasonal:26,propensity:16.3,change:-15.3},
-      {id:"evreux",name:"Évreux",projects:5366,difficulty:52,seasonal:17,propensity:20.7,change:-1.2},
-      {id:"gisors",name:"Gisors",projects:876,difficulty:66,seasonal:46,propensity:18.5,change:-2.7},
-      {id:"louviers",name:"Louviers",projects:1924,difficulty:41,seasonal:25,propensity:22.1,change:-24.5},
-      {id:"pont-audemer",name:"Pont-Audemer",projects:1522,difficulty:42,seasonal:22,propensity:20.9,change:9.8},
-      {id:"vernon",name:"Vernon",projects:2220,difficulty:38,seasonal:38,propensity:20.3,change:-10.5}
+      {id:"bernay",name:"Bernay",projects:1360,difficulty:44.1,seasonal:26.5,change:-15.5},
+      {id:"evreux",name:"Évreux",projects:5370,difficulty:52.3,seasonal:17.1,change:-1.1},
+      {id:"gisors",name:"Gisors",projects:880,difficulty:65.9,seasonal:46.6,change:-2.2},
+      {id:"louviers",name:"Louviers",projects:1920,difficulty:41.7,seasonal:25.5,change:-24.7},
+      {id:"pont-audemer",name:"Pont-Audemer",projects:1520,difficulty:42.8,seasonal:21.7,change:9.4},
+      {id:"vernon",name:"Vernon",projects:2220,difficulty:38.7,seasonal:37.8,change:-10.5}
     ]},
     "50":{name:"Manche",basins:[
-      {id:"saint-lo-coutances",name:"Saint-Lô - Coutances",projects:6759,difficulty:52,seasonal:40,propensity:26.4,change:-9.5},
-      {id:"nord-cotentin",name:"Nord-Cotentin",projects:5548,difficulty:61,seasonal:24,propensity:27.1,change:-7.9},
-      {id:"sud-manche",name:"Sud-Manche",projects:5596,difficulty:53,seasonal:37,propensity:26.7,change:-5.9}
+      {id:"saint-lo-coutances",name:"Saint-Lô - Coutances",projects:6760,difficulty:51.9,seasonal:39.8,change:-9.5},
+      {id:"nord-cotentin",name:"Nord-Cotentin",projects:5550,difficulty:61.1,seasonal:24.5,change:-7.8},
+      {id:"sud-manche",name:"Sud-Manche",projects:5600,difficulty:53.0,seasonal:37.5,change:-5.9}
     ]},
     "61":{name:"Orne",basins:[
-      {id:"alencon",name:"Alençon",projects:2108,difficulty:52,seasonal:26,propensity:20.9,change:-10.5},
-      {id:"argentan",name:"Argentan",projects:1025,difficulty:44,seasonal:34,propensity:15.6,change:13.0},
-      {id:"flers",name:"Flers",projects:2541,difficulty:60,seasonal:19,propensity:23.6,change:-10.7},
-      {id:"mortagne-aigle",name:"Mortagne - L'Aigle",projects:1783,difficulty:53,seasonal:22,propensity:22.9,change:-15.7}
+      {id:"alencon",name:"Alençon",projects:2110,difficulty:51.7,seasonal:26.5,change:-10.6},
+      {id:"argentan",name:"Argentan",projects:1030,difficulty:43.7,seasonal:34.0,change:13.2},
+      {id:"flers",name:"Flers",projects:2540,difficulty:59.8,seasonal:18.9,change:-10.9},
+      {id:"mortagne-aigle",name:"Mortagne - L'Aigle",projects:1780,difficulty:52.8,seasonal:22.5,change:-15.6}
     ]},
     "76":{name:"Seine-Maritime",basins:[
-      {id:"caux-maritime",name:"Caux-Maritime",projects:3195,difficulty:42,seasonal:42,propensity:20.1,change:-5.1},
-      {id:"fecamp",name:"Fécamp",projects:1532,difficulty:61,seasonal:36,propensity:21.5,change:7.7},
-      {id:"forges-les-eaux",name:"Forges-les-Eaux",projects:1259,difficulty:60,seasonal:33,propensity:20.2,change:-0.8},
-      {id:"lillebonne",name:"Lillebonne",projects:1122,difficulty:49,seasonal:27,propensity:19.8,change:-9.0},
-      {id:"rouen",name:"Rouen",projects:15393,difficulty:45,seasonal:18,propensity:23.3,change:-10.5},
-      {id:"elbeuf",name:"Elbeuf",projects:2054,difficulty:41,seasonal:22,propensity:27.2,change:10.9},
-      {id:"le-havre",name:"Le Havre",projects:7370,difficulty:42,seasonal:25,propensity:21.9,change:-1.7},
-      {id:"pays-de-caux",name:"Pays de Caux",projects:2071,difficulty:54,seasonal:27,propensity:17.6,change:-25.7},
-      {id:"le-treport",name:"Le Tréport",projects:901,difficulty:54,seasonal:51,propensity:20.3,change:-22.4}
+      {id:"caux-maritime",name:"Caux-Maritime",projects:3200,difficulty:41.9,seasonal:42.5,change:-5.0},
+      {id:"fecamp",name:"Fécamp",projects:1530,difficulty:60.8,seasonal:36.6,change:7.7},
+      {id:"forges-les-eaux",name:"Forges-les-Eaux",projects:1260,difficulty:60.3,seasonal:33.3,change:-0.8},
+      {id:"lillebonne",name:"Lillebonne",projects:1120,difficulty:49.1,seasonal:26.8,change:-8.9},
+      {id:"rouen",name:"Rouen",projects:15390,difficulty:45.5,seasonal:18.0,change:-10.5},
+      {id:"elbeuf",name:"Elbeuf",projects:2050,difficulty:40.5,seasonal:22.0,change:10.8},
+      {id:"le-havre",name:"Le Havre",projects:7370,difficulty:42.1,seasonal:24.6,change:-1.7},
+      {id:"pays-de-caux",name:"Pays de Caux",projects:2070,difficulty:54.1,seasonal:26.6,change:-25.8},
+      {id:"le-treport",name:"Le Tréport",projects:900,difficulty:53.3,seasonal:52.2,change:-22.4}
     ]}
   }}
 };
