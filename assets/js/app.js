@@ -475,12 +475,14 @@ function renderJobs(){
             <div class="summary-card">
               <strong>Détail de compatibilité</strong>
               <ul class="small-list">
-                ${Object.entries(j.match.breakdown).map(([k,v])=>`<li>${k} : <strong>${v}%</strong></li>`).join("")}
+                ${Object.entries(j.match.breakdown).map(([k,v])=>`<li>${k} : <strong>${typeof v==="number"?v+"%":esc(v)}</strong></li>`).join("")}
                 <li>Indice principal : <strong>${j.match.base}%</strong></li>
                 <li>Bonus loisirs : <strong>+${j.match.interestBonus}</strong></li>
                 <li>Bonus expérience de travail : <strong>+${j.match.experienceBonus}</strong></li>
                 <li>Bonus qualités : <strong>+${j.match.qualityBonus}</strong></li>
                 <li>Impact points de vigilance : <strong>-${j.match.defectPenalty}</strong></li>
+                ${j.match.ordinaryPreferencePenalty?`<li>Préférences en conflit : <strong>-${j.match.ordinaryPreferencePenalty}</strong></li>`:""}
+                ${j.match.impossiblePenalty?`<li>Préférence marquée « Impossible » : <strong>-${j.match.impossiblePenalty}</strong></li>`:""}
                 ${j.match.accessPenalty?`<li>Contraintes d\'accès : <strong>-${j.match.accessPenalty}</strong></li>`:""}
                 <li>Impact handicap / limitations : <strong>-${j.match.accessibilityPenalty}</strong></li>
                 ${j.match.accessReasons?.length?j.match.accessReasons.map(x=>`<li>${esc(x)}</li>`).join(""):""}
@@ -560,7 +562,7 @@ function updateAdvisorOptions(){
   sel.innerHTML='<option value="">Aucun / je ne sais pas</option>';
   if(inst) sel.innerHTML += inst.advisors.map(a=>`<option value="${a.id}">${a.firstName} ${a.lastName}</option>`).join("");
 }
-const DEMO_STATE_VERSION="2026-10-02-r1";
+const DEMO_STATE_VERSION="2026-10-02-r2";
 const DEMO_DOSSIERS=[
   {ref:"ORI-7F3K-2PA",date:"2026-10-01T09:20:00",firstName:"Camille",lastName:"Numérique",age:31,education:2,disabilitiesSelected:[],functionalLimits:[],regionId:"normandie",departmentCode:"14",employmentAreaId:"caen",employmentArea:"Caen",institutionId:"enefa-herouville",advisorId:"demo-advisor",skills:["Utiliser des outils numériques","Résoudre des problèmes","Organiser son travail"],soft:["Curiosité","Patience","Autonomie"],hobbiesSelected:["video_games","computing","strategy_games"],results:[{title:"Technicien support informatique",score:78},{title:"Médiateur numérique",score:72}]},
   {ref:"ORI-Q9D4-8LM",date:"2026-09-30T14:10:00",firstName:"Sophie",lastName:"Accompagnement",age:42,education:2,disabilitiesSelected:[],functionalLimits:[],regionId:"normandie",departmentCode:"14",employmentAreaId:"caen",employmentArea:"Caen",institutionId:"enefa-herouville",advisorId:"demo-advisor",skills:["Accueillir du public","Conseiller une personne","Rédiger des documents"],soft:["Écoute","Diplomatie","Organisation"],hobbiesSelected:["reading","social","writing"],results:[{title:"Conseiller en insertion professionnelle",score:76},{title:"Assistant ressources humaines",score:69}]},
@@ -788,6 +790,20 @@ function downloadDossier(ref){
   const d=getDossiers().find(x=>x.ref===ref);if(!d)return;
   downloadHtmlFile(`Dossier_Orientation_Pro_${safeFilename(d.firstName+"_"+d.lastName)}_${safeFilename(d.ref)}.html`,downloadableDossierHtml(d,"Dossier Orientation Pro"));
 }
+function printDossier(ref){
+  const d=getDossiers().find(x=>x.ref===ref);
+  if(!d)return;
+  const w=window.open("","_blank");
+  if(!w){
+    alert("Le navigateur a bloqué la fenêtre d'impression. Autorisez les fenêtres contextuelles pour imprimer le dossier.");
+    return;
+  }
+  w.document.open();
+  w.document.write(downloadableDossierHtml(d,"Dossier JusteCap"));
+  w.document.close();
+  w.focus();
+  setTimeout(()=>w.print(),250);
+}
 function deleteDossier(ref){
   const d=getDossiers().find(x=>x.ref===ref);if(!d)return;
   const ok=confirm(`Supprimer définitivement le dossier de ${d.firstName} ${d.lastName} (${d.ref}) ?\n\nCette action est irréversible dans ce prototype.`);
@@ -799,7 +815,7 @@ function deleteDossier(ref){
 function openDossier(ref){
   const d=getDossiers().find(x=>x.ref===ref);if(!d)return;const inst=institutions.find(i=>i.id===d.institutionId),adv=inst?.advisors.find(a=>a.id===d.advisorId);
   document.getElementById("modalTitle").textContent=`${d.firstName} ${d.lastName}`;document.getElementById("modalSubtitle").textContent=`${d.ref} • ${new Date(d.date).toLocaleString("fr-FR")}`;
-  document.getElementById("modalBody").innerHTML=`<div class="details-grid"><div class="summary-card"><strong>Profil</strong><ul class="small-list"><li>Âge : ${d.age||"-"}</li><li>Handicap(s) : ${esc(labelsFrom(d.disabilitiesSelected,disabilityOptions).join(", ")||"Non renseigné")}</li><li>Impacts fonctionnels : ${esc(labelsFrom(d.functionalLimits,functionalLimitOptions).join(", ")||"Aucun renseigné")}</li><li>Bassin(s) d'emploi : ${esc((d.employmentAreas&&d.employmentAreas.length?d.employmentAreas.join(", "):d.employmentArea)||"Non renseigné")}</li><li>Établissement : ${esc(inst?.name||"Non renseigné")}</li><li>Conseiller : ${esc(adv?adv.firstName+" "+adv.lastName:"Non renseigné")}</li></ul></div><div class="summary-card"><strong>Savoir-faire</strong><ul class="small-list">${(d.skills||[]).map(x=>`<li>${esc(x)}</li>`).join("")||"<li>Aucun</li>"}</ul></div><div class="summary-card"><strong>Savoir-être</strong><ul class="small-list">${(d.soft||[]).map(x=>`<li>${esc(x)}</li>`).join("")||"<li>Aucun</li>"}</ul></div><div class="summary-card"><strong>Qualités</strong><ul class="small-list">${(d.qualitiesSelected||[]).map(x=>`<li>${qualityOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join("")||"<li>Aucune</li>"}</ul></div><div class="summary-card"><strong>Points de vigilance</strong><ul class="small-list">${(d.defectsSelected||[]).map(x=>`<li>${defectOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join("")||"<li>Aucun</li>"}</ul></div><div class="summary-card"><strong>Loisirs</strong><ul class="small-list">${(d.hobbiesSelected||[]).map(x=>`<li>${hobbyOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join("")||"<li>Aucun</li>"}</ul></div><div class="summary-card"><strong>Conditions déjà pratiquées</strong><ul class="small-list">${(d.experienceSelected||[]).map(x=>`<li>${experienceOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join("")||"<li>Aucune</li>"}</ul></div><div class="summary-card"><strong>Résultats</strong><ol class="small-list">${(d.results||[]).map(r=>`<li>${esc(r.title)} : <strong>${esc(r.score)}%</strong>${r.marketIndex?` • indice local démo ${esc(r.marketIndex)}/100 (${esc(r.marketLabel||"")})`:""}</li>`).join("")}</ol></div></div><div class="actions" style="justify-content:flex-end"><button class="btn secondary" onclick="downloadDossier('${d.ref}')">Télécharger ce dossier</button><button class="btn danger" onclick="deleteDossier('${d.ref}')">Supprimer ce dossier</button></div>`;
+  document.getElementById("modalBody").innerHTML=`<div class="details-grid"><div class="summary-card"><strong>Profil</strong><ul class="small-list"><li>Âge : ${d.age||"-"}</li><li>Handicap(s) : ${esc(labelsFrom(d.disabilitiesSelected,disabilityOptions).join(", ")||"Non renseigné")}</li><li>Impacts fonctionnels : ${esc(labelsFrom(d.functionalLimits,functionalLimitOptions).join(", ")||"Aucun renseigné")}</li><li>Bassin(s) d'emploi : ${esc((d.employmentAreas&&d.employmentAreas.length?d.employmentAreas.join(", "):d.employmentArea)||"Non renseigné")}</li><li>Établissement : ${esc(inst?.name||"Non renseigné")}</li><li>Conseiller : ${esc(adv?adv.firstName+" "+adv.lastName:"Non renseigné")}</li></ul></div><div class="summary-card"><strong>Savoir-faire</strong><ul class="small-list">${(d.skills||[]).map(x=>`<li>${esc(x)}</li>`).join("")||"<li>Aucun</li>"}</ul></div><div class="summary-card"><strong>Savoir-être</strong><ul class="small-list">${(d.soft||[]).map(x=>`<li>${esc(x)}</li>`).join("")||"<li>Aucun</li>"}</ul></div><div class="summary-card"><strong>Qualités</strong><ul class="small-list">${(d.qualitiesSelected||[]).map(x=>`<li>${qualityOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join("")||"<li>Aucune</li>"}</ul></div><div class="summary-card"><strong>Points de vigilance</strong><ul class="small-list">${(d.defectsSelected||[]).map(x=>`<li>${defectOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join("")||"<li>Aucun</li>"}</ul></div><div class="summary-card"><strong>Loisirs</strong><ul class="small-list">${(d.hobbiesSelected||[]).map(x=>`<li>${hobbyOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join("")||"<li>Aucun</li>"}</ul></div><div class="summary-card"><strong>Conditions déjà pratiquées</strong><ul class="small-list">${(d.experienceSelected||[]).map(x=>`<li>${experienceOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join("")||"<li>Aucune</li>"}</ul></div><div class="summary-card"><strong>Résultats</strong><ol class="small-list">${(d.results||[]).map(r=>`<li>${esc(r.title)} : <strong>${esc(r.score)}%</strong>${r.marketIndex?` • indice local démo ${esc(r.marketIndex)}/100 (${esc(r.marketLabel||"")})`:""}</li>`).join("")}</ol></div></div><div class="actions" style="justify-content:flex-end"><button class="btn secondary" onclick="downloadDossier('${d.ref}')">Télécharger ce dossier</button><button class="btn secondary" onclick="printDossier('${d.ref}')">Imprimer ce dossier</button><button class="btn danger" onclick="deleteDossier('${d.ref}')">Supprimer ce dossier</button></div>`;
   document.getElementById("dossierModal").classList.add("open");
 }
 function closeModal(){document.getElementById("dossierModal").classList.remove("open")}
