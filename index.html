@@ -15,8 +15,10 @@
       <button id="beneficiaryMode" class="mode-btn active" onclick="goToStep(currentStep)">Trouver un métier</button>
       <button id="skillsMode" class="mode-btn" onclick="showSkillDiscovery()">Connaître MES compétences</button>
       <button id="advisorMode" class="mode-btn" onclick="showAdvisorLogin()">Espace conseiller</button>
+      <button class="mode-btn" type="button" disabled title="Lien D&D CV à connecter">D&D CV</button>
     </div>
     <div id="steps"></div>
+    <button class="demo-reset-btn" type="button" onclick="resetDemoState()">Réinitialiser la démo</button>
   </aside>
 
   <main class="main">
@@ -27,6 +29,7 @@
       </div>
       <div class="badge">Version de démonstration</div>
     </div>
+    <div class="demo-warning"><strong>Version publique de démonstration.</strong> Utilisez uniquement des informations fictives. Les données saisies pour cette démo restent dans ce navigateur.</div>
 
     <section class="section active panel" data-step="0">
       <div class="grid-2">
@@ -74,7 +77,7 @@
             <div class="hint">Ces choix influencent directement les métiers proposés. Ils évitent de supposer automatiquement ce qu'une personne peut ou ne peut pas faire à partir du seul nom de son handicap.</div>
             <div class="tag-wrap" id="functionalLimitTags"></div>
           </div>
-          <div class="hint" style="margin-top:8px">Pour une profession soumise à une aptitude médicale ou réglementaire, Orientation Pro signale qu'une vérification est nécessaire. L'application ne remplace pas un avis médical.</div>
+          <div class="hint" style="margin-top:8px">Pour une profession soumise à une aptitude médicale ou réglementaire, JusteCap signale qu'une vérification est nécessaire. L'application ne remplace pas un avis médical.</div>
         </div>
       </div>
       <div class="block" style="margin-top:24px">
@@ -84,7 +87,7 @@
           <label class="field"><span>Établissement</span><select id="institution" onchange="updateAdvisorOptions()"><option value="">Aucun / je ne sais pas</option></select></label>
           <label class="field"><span>Conseiller d'insertion</span><select id="advisor"><option value="">Aucun / je ne sais pas</option></select></label>
         </div>
-        <div class="institution-note">Exemple intégré à la démonstration : <strong>Enefa - Caen</strong>, avec un compte conseiller fictif.</div>
+        <div class="institution-note">Exemple intégré à la démonstration : <strong>ENEFA - Hérouville-Saint-Clair</strong>, avec un compte conseiller fictif.</div>
       </div>
       <div id="profileValidation" class="validation-error" role="alert"></div>
       <div class="actions"><span></span><button class="btn primary" onclick="nextStep()">Continuer</button></div>
@@ -133,7 +136,7 @@
     </section>
 
     <section class="section panel" data-step="3">
-      <div class="notice">Pour ce prototype, les préférences servent réellement au calcul du score. Une préférence peut être souhaitée, neutre, à éviter ou impossible.</div>
+      <div class="notice">Dans cette démonstration, les préférences servent réellement au calcul de l'indice de compatibilité. Une préférence peut être souhaitée, neutre, à éviter ou impossible.</div>
       <div class="preference-grid" id="prefGrid"></div>
       <div class="block" style="margin-top:22px">
         <h2 class="subheading">Salaire minimum souhaité</h2>
@@ -221,8 +224,8 @@
       <div class="advisor-shell">
         <div>
           <h2 style="margin-top:0">Espace conseiller</h2>
-          <p class="hint">Le bénéficiaire n'a pas besoin de compte. Le conseiller, lui, se connecte pour consulter les dossiers qui lui sont rattachés.</p>
-          <div class="notice"><strong>Compte de démonstration</strong><br>conseiller.demo / demo</div>
+          <p class="hint"><strong>Simulation de l'espace conseiller.</strong> Le bénéficiaire n'a pas besoin de compte. Le compte ci-dessous sert uniquement à montrer le parcours et ne représente pas l'authentification prévue pour une version professionnelle.</p>
+          <div class="notice"><strong>Compte fictif de démonstration</strong><br>conseiller.demo / demo<br><span class="hint">Les dossiers affichés sont eux aussi fictifs.</span></div>
         </div>
         <div>
           <label class="field"><span>Identifiant</span><input id="loginUser" placeholder="conseiller.demo"></label>
