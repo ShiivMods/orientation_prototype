@@ -389,7 +389,7 @@ function renderJobs(){
               <strong>Référentiel métier</strong>
               ${j.rome
                 ? `<p class="hint"><strong>ROME ${esc(j.rome)}</strong><br>${esc(j.officialTitle||j.title)}</p>
-                   <a class="source-link" href="${esc(j.romeUrl)}" target="_blank" rel="noopener noreferrer">Consulter la fiche France Travail ↗</a>
+                   <a class="source-link" href="${esc(j.romeUrl)}" target="_blank" rel="noopener noreferrer">Voir France Travail pour ce ROME ↗</a>
                    ${j.sourceNote?`<p class="hint" style="margin-top:8px">${esc(j.sourceNote)}</p>`:""}`
                 : `<p class="hint">${esc(j.sourceNote||"Le rattachement ROME de cet intitulé de démonstration doit encore être précisé.")}</p>`}
             </div>
