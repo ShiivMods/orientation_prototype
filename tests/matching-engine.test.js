@@ -74,3 +74,34 @@ test('local market demo index is deterministic for the same job and basin', () =
   const pair = expr(ctx, "(() => { const job = jobs.find(j => j.id === 2); const basin = getBasinById('caen'); return [localMarketForBasin(job, basin).index, localMarketForBasin(job, basin).index]; })()");
   assert.equal(pair[0], pair[1]);
 });
+
+
+test('neutral preferences do not add compatibility points', () => {
+  const ctx = makeContext(baseProfile());
+  const pref = expr(ctx, 'preferenceScore(jobs.find(j => j.id === 2))');
+  assert.equal(pref.score, null);
+  assert.equal(pref.activeCount, 0);
+});
+
+test('an empty evidence profile does not receive free compatibility points', () => {
+  const ctx = makeContext(baseProfile({
+    skills: [],
+    soft: [],
+    qualitiesSelected: [],
+    prefs: {
+      public: 'neutral', team: 'neutral', outdoor: 'neutral', physical: 'neutral',
+      routine: 'neutral', travel: 'neutral', remote: 'neutral', fixed: 'neutral',
+      weekend: 'neutral', night: 'neutral'
+    }
+  }));
+  const totals = expr(ctx, 'jobs.map(j => scoreJob(j).total)');
+  assert.ok(totals.every(score => score === 0));
+});
+
+test('Caen BMO demo data matches the published 2026 values', () => {
+  const ctx = makeContext(baseProfile());
+  const caen = expr(ctx, "getBasinById('caen')");
+  assert.equal(caen.projects, 16010);
+  assert.equal(caen.difficulty, 43.2);
+  assert.equal(caen.seasonal, 30.3);
+});
