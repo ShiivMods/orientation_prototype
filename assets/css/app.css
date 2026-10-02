@@ -184,3 +184,7 @@ label.field{display:block}
 .skill-search-group-title{padding:10px 13px;background:#f7f8fb;border-top:1px solid var(--border);font-size:12px;font-weight:800;color:#465065}
 .skill-search-group-title:first-child{border-top:0}
 .skill-search-results .skill-row{padding-left:13px;padding-right:13px}
+
+.result-count{font-size:13px;color:var(--muted);margin:0 0 10px;font-weight:650}
+.filter-help.good{color:#147a4b}
+.filter-help.warn{color:#9a5b00}
