@@ -77,6 +77,90 @@ let currentAdvisor=null;
 let profile={};
 let lastSentDossierRef=null;
 let selectedPastJobIds=[];
+let selectedSkillMacroState=new Set();
+
+function escAttr(value){
+  return String(value??"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function normalizeSearchText(value){
+  return String(value??"")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .toLocaleLowerCase("fr")
+    .replace(/[’']/g," ")
+    .replace(/[^a-z0-9+\-/. ]+/g," ")
+    .replace(/\s+/g," ")
+    .trim();
+}
+function skillSearchHaystack(skill){
+  return normalizeSearchText([skill.label,skill.base,skill.categoryLabel,...(skill.details||[])].join(" "));
+}
+function renderSkillRow(skill){
+  const checked=selectedSkillMacroState.has(skill.id)?" checked":"";
+  return `<div class="skill-row">
+    <div class="skill-main">
+      <input type="checkbox" id="macro_${escAttr(skill.id)}" value="${escAttr(skill.id)}" name="skillMacros"${checked} onchange="toggleSkillMacroState('${escAttr(skill.id)}',this.checked)">
+      <label for="macro_${escAttr(skill.id)}">${esc(skill.label)}</label>
+    </div>
+    <div class="skill-detail-list">${(skill.details||[]).map(detail=>`• ${esc(detail)}`).join("<br>")}</div>
+  </div>`;
+}
+function renderSkillBrowser(){
+  const host=document.getElementById("skillsBrowser");
+  if(!host) return;
+  const input=document.getElementById("skillSearch");
+  const query=normalizeSearchText(input?.value||"");
+  const terms=query.split(" ").filter(Boolean);
+  const status=document.getElementById("skillSearchStatus");
+
+  if(query){
+    const hits=skillTaxonomy.filter(skill=>{
+      const haystack=skillSearchHaystack(skill);
+      return terms.every(term=>haystack.includes(term));
+    });
+    const groups=[...new Map(hits.map(skill=>[skill.category,skill.categoryLabel])).entries()];
+    host.innerHTML=hits.length
+      ? `<div class="skill-search-results">${groups.map(([category,label])=>{
+          const items=hits.filter(skill=>skill.category===category);
+          return `<div class="skill-search-group-title">${esc(label)} • ${items.length} résultat${items.length>1?"s":""}</div>${items.map(renderSkillRow).join("")}`;
+        }).join("")}</div>`
+      : `<div class="empty">Aucune compétence trouvée pour « ${esc(input?.value||"")} ».</div>`;
+    if(status) status.innerHTML=hits.length
+      ? `<strong>${hits.length}</strong> compétence${hits.length>1?"s":""} trouvée${hits.length>1?"s":""}. La recherche porte aussi sur les 668 précisions.`
+      : "Aucun résultat. Essayez un terme plus général ou un outil, par exemple Excel, accueil, conduite, soudage ou JavaScript.";
+  }else{
+    const categories=[...new Map(skillTaxonomy.map(skill=>[skill.category,skill.categoryLabel])).entries()];
+    host.innerHTML=categories.map(([category,label])=>{
+      const items=skillTaxonomy.filter(skill=>skill.category===category);
+      return `<details class="skill-category"><summary><span>${esc(label)}</span><span class="hint">${items.length} compétences</span></summary><div class="skill-category-body">${items.map(renderSkillRow).join("")}</div></details>`;
+    }).join("");
+    if(status) status.textContent="Recherchez un terme précis ou ouvrez une catégorie. Les catégories restent repliées pour éviter de surcharger l'écran.";
+  }
+
+  host.classList.toggle("show-skill-details",document.getElementById("showSkillDetails")?.checked||false);
+  updateSkillSelectionCount();
+}
+function filterSkillBrowser(){renderSkillBrowser()}
+function clearSkillSearch(){
+  const input=document.getElementById("skillSearch");
+  if(input) input.value="";
+  renderSkillBrowser();
+}
+function toggleSkillMacroState(id,checked){
+  if(checked) selectedSkillMacroState.add(id); else selectedSkillMacroState.delete(id);
+  updateSkillSelectionCount();
+}
+function toggleSkillDetails(){
+  document.getElementById("skillsBrowser")?.classList.toggle("show-skill-details",document.getElementById("showSkillDetails")?.checked||false);
+}
+function updateSkillSelectionCount(){
+  const el=document.getElementById("skillSelectionCount");
+  if(el) el.textContent=`${selectedSkillMacroState.size} sélectionnée${selectedSkillMacroState.size>1?"s":""}`;
+}
+function selectedSkillMacroIds(){return [...selectedSkillMacroState]}
+function selectedSkillBases(){
+  return [...new Set([...selectedSkillMacroState].map(id=>skillById.get(id)?.base).filter(Boolean))];
+}
 
 function init(){
   document.getElementById("steps").innerHTML = steps.map((s,i)=>`
@@ -84,8 +168,7 @@ function init(){
       <div class="step-num">${i+1}</div><div><strong>${s[0]}</strong><br><span style="font-size:11px">${s[1]}</span></div>
     </div>`).join("");
 
-  document.getElementById("skillsTags").innerHTML = skillOptions.map((s,i)=>`
-    <div class="tag"><input type="checkbox" id="skill_${i}" value="${s}" name="skills"><label for="skill_${i}">${s}</label></div>`).join("");
+  renderSkillBrowser();
   document.getElementById("softTags").innerHTML = softOptions.map((s,i)=>`
     <div class="tag"><input type="checkbox" id="soft_${i}" value="${s}" name="soft"><label for="soft_${i}">${s}</label></div>`).join("");
   document.getElementById("qualityTags").innerHTML = qualityOptions.map(([key,label],i)=>`
@@ -166,8 +249,8 @@ function validateCurrentStep(){
     }
   }
   if(currentStep===1){
-    const aptitudeCount=document.querySelectorAll(
-      'input[name="skills"]:checked, input[name="soft"]:checked, input[name="qualitiesSelected"]:checked, input[name="defectsSelected"]:checked'
+    const aptitudeCount=selectedSkillMacroState.size+document.querySelectorAll(
+      'input[name="soft"]:checked, input[name="qualitiesSelected"]:checked, input[name="defectsSelected"]:checked'
     ).length;
     if(aptitudeCount<1){
       const box=document.getElementById("aptitudeValidation");
@@ -207,7 +290,8 @@ function readProfile(){
     advisorId:document.getElementById("advisor").value,
     maxTraining:Number(document.getElementById("maxTraining").value),
     salary:Number(document.getElementById("salary").value),
-    skills:[...document.querySelectorAll('input[name="skills"]:checked')].map(x=>x.value),
+    skillMacros:selectedSkillMacroIds(),
+    skills:selectedSkillBases(),
     soft:[...document.querySelectorAll('input[name="soft"]:checked')].map(x=>x.value),
     qualitiesSelected:[...document.querySelectorAll('input[name="qualitiesSelected"]:checked')].map(x=>x.value),
     defectsSelected:[...document.querySelectorAll('input[name="defectsSelected"]:checked')].map(x=>x.value),
@@ -522,9 +606,21 @@ function renderSelectedPastJobs(){
 function aggregatePotential(itemsKey){
   const map=new Map();
   selectedPastJobIds.forEach(id=>{
-    const job=jobs.find(j=>j.id===id); if(!job) return;
+    const job=jobs.find(j=>j.id===id);
+    if(!job) return;
+
+    if(itemsKey==="skillMacros"){
+      jobMacroRequirements(job).forEach(macroId=>{
+        const macro=skillById.get(macroId);
+        if(!macro) return;
+        if(!map.has(macroId)) map.set(macroId,{id:macroId,name:macro.label,category:macro.categoryLabel,details:macro.details||[],count:0,jobs:[]});
+        const entry=map.get(macroId); entry.count++; entry.jobs.push(job.title);
+      });
+      return;
+    }
+
     (job[itemsKey]||[]).forEach(item=>{
-      if(!map.has(item)) map.set(item,{name:item,count:0,jobs:[]});
+      if(!map.has(item)) map.set(item,{id:item,name:item,count:0,jobs:[]});
       const entry=map.get(item); entry.count++; entry.jobs.push(job.title);
     });
   });
@@ -533,24 +629,27 @@ function aggregatePotential(itemsKey){
 function analyzePastJobs(){
   const out=document.getElementById("skillDiscoveryResults");
   if(!selectedPastJobIds.length){out.innerHTML='<div class="notice">Ajoutez au moins un métier avant de lancer l\'analyse.</div>';return}
-  const skills=aggregatePotential("skills"), soft=aggregatePotential("soft");
-  const card=(x,type,i)=>`<div class="competency-card"><label><input type="checkbox" name="discovered_${type}" value="${esc(x.name)}" checked><span>${esc(x.name)}</span></label><div class="competency-source">Associé à ${x.count}/${selectedPastJobIds.length} métier(s) sélectionné(s) : ${x.jobs.map(esc).join(", ")}</div></div>`;
+  const skills=aggregatePotential("skillMacros"), soft=aggregatePotential("soft");
+  const skillCard=x=>`<div class="competency-card"><label><input type="checkbox" name="discovered_skill_macro" value="${escAttr(x.id)}" checked><span>${esc(x.name)}</span></label><div class="competency-source"><strong>${esc(x.category)}</strong><br>Potentiellement liée à ${x.count}/${selectedPastJobIds.length} métier(s) : ${x.jobs.map(esc).join(", ")}${x.details?.length?`<div style="margin-top:6px"><strong>Précisions :</strong> ${x.details.slice(0,4).map(esc).join(" • ")}</div>`:""}</div></div>`;
+  const softCard=x=>`<div class="competency-card"><label><input type="checkbox" name="discovered_soft" value="${escAttr(x.name)}" checked><span>${esc(x.name)}</span></label><div class="competency-source">Potentiellement mobilisé dans ${x.count}/${selectedPastJobIds.length} métier(s) : ${x.jobs.map(esc).join(", ")}</div></div>`;
   out.innerHTML=`
-    <div class="success"><strong>${skills.length}</strong> savoir-faire et <strong>${soft.length}</strong> savoir-être potentiels identifiés. Décochez ceux que vous estimez ne pas avoir réellement pratiqués ou acquis.</div>
-    <div class="competency-group"><h3 class="subheading">Savoir-faire potentiellement acquis</h3><div class="competency-list">${skills.map((x,i)=>card(x,"skill",i)).join("")||'<div class="empty">Aucun savoir-faire identifié.</div>'}</div></div>
-    <div class="competency-group"><h3 class="subheading">Savoir-être potentiellement mobilisés</h3><div class="competency-list">${soft.map((x,i)=>card(x,"soft",i)).join("")||'<div class="empty">Aucun savoir-être identifié.</div>'}</div></div>
+    <div class="success"><strong>${skills.length}</strong> savoir-faire détaillés et <strong>${soft.length}</strong> savoir-être potentiels identifiés. Décochez ce que vous n'avez pas réellement pratiqué ou acquis.</div>
+    <div class="competency-group"><h3 class="subheading">Savoir-faire potentiellement acquis</h3><div class="hint" style="margin-bottom:10px">Les propositions utilisent la même taxonomie détaillée que le questionnaire.</div><div class="competency-list">${skills.map(skillCard).join("")||'<div class="empty">Aucun savoir-faire identifié.</div>'}</div></div>
+    <div class="competency-group"><h3 class="subheading">Savoir-être potentiellement mobilisés</h3><div class="competency-list">${soft.map(softCard).join("")||'<div class="empty">Aucun savoir-être identifié.</div>'}</div></div>
     <div class="actions" style="justify-content:flex-end"><button class="btn secondary" onclick="downloadSkillDiscovery()">Télécharger cette liste</button><button class="btn primary" onclick="applyDiscoveredSkills()">Ajouter les éléments cochés à mon orientation</button></div>`;
 }
 function applyDiscoveredSkills(){
-  const skills=[...document.querySelectorAll('input[name="discovered_skill"]:checked')].map(x=>x.value);
+  const macroIds=[...document.querySelectorAll('input[name="discovered_skill_macro"]:checked')].map(x=>x.value);
   const soft=[...document.querySelectorAll('input[name="discovered_soft"]:checked')].map(x=>x.value);
-  skills.forEach(v=>{const el=[...document.querySelectorAll('input[name="skills"]')].find(x=>x.value===v);if(el)el.checked=true});
-  soft.forEach(v=>{const el=[...document.querySelectorAll('input[name="soft"]')].find(x=>x.value===v);if(el)el.checked=true});
+  macroIds.forEach(id=>selectedSkillMacroState.add(id));
+  renderSkillBrowser();
+  soft.forEach(value=>{const el=[...document.querySelectorAll('input[name="soft"]')].find(x=>x.value===value);if(el)el.checked=true});
   goToStep(1);
   window.scrollTo({top:0,behavior:"smooth"});
 }
 function downloadSkillDiscovery(){
-  const skills=[...document.querySelectorAll('input[name="discovered_skill"]:checked')].map(x=>x.value);
+  const macroIds=[...document.querySelectorAll('input[name="discovered_skill_macro"]:checked')].map(x=>x.value);
+  const skills=macroIds.map(id=>skillById.get(id)?.label).filter(Boolean);
   const soft=[...document.querySelectorAll('input[name="discovered_soft"]:checked')].map(x=>x.value);
   if(!skills.length&&!soft.length){alert("Aucune compétence n'est cochée.");return}
   const oldJobs=selectedPastJobIds.map(id=>jobs.find(j=>j.id===id)?.title).filter(Boolean);
