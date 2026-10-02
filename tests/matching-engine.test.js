@@ -6,11 +6,12 @@ const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const catalog = fs.readFileSync(path.join(root, 'assets/js/catalog.js'), 'utf8');
+const taxonomy = fs.readFileSync(path.join(root, 'assets/js/skills-taxonomy.js'), 'utf8');
 const engine = fs.readFileSync(path.join(root, 'assets/js/matching-engine.js'), 'utf8');
 
 function makeContext(profile) {
   const context = vm.createContext({ profile });
-  vm.runInContext(catalog + '\n' + engine, context, { filename: 'justecap-engine.js' });
+  vm.runInContext(catalog + '\n' + taxonomy + '\n' + engine, context, { filename: 'justecap-engine.js' });
   return context;
 }
 
@@ -19,7 +20,8 @@ function baseProfile(overrides = {}) {
     education: 2,
     maxTraining: 12,
     salary: 1600,
-    skills: ['Utiliser des outils numériques', 'Résoudre des problèmes'],
+    skills: [],
+    skillMacros: ['numerique-02', 'analyse-04'],
     soft: ['Curiosité', 'Rigueur', 'Autonomie'],
     qualitiesSelected: [],
     defectsSelected: [],
@@ -86,6 +88,7 @@ test('neutral preferences do not add compatibility points', () => {
 test('an empty evidence profile does not receive free compatibility points', () => {
   const ctx = makeContext(baseProfile({
     skills: [],
+    skillMacros: [],
     soft: [],
     qualitiesSelected: [],
     prefs: {
@@ -122,4 +125,28 @@ test('generic demo job titles are not forced into a ROME family', () => {
   const ctx = makeContext(baseProfile());
   const refs = expr(ctx, '[jobs.find(j=>j.id===4).rome, jobs.find(j=>j.id===5).rome, jobs.find(j=>j.id===9).rome]');
   assert.deepEqual(Array.from(refs), [null, null, null]);
+});
+
+
+test('taxonomy exposes exactly 15 categories, 167 macros and 668 details', () => {
+  const ctx = makeContext(baseProfile());
+  const stats = expr(ctx, 'skillTaxonomyStats');
+  assert.equal(stats.categories, 15);
+  assert.equal(stats.macros, 167);
+  assert.equal(stats.details, 668);
+});
+
+test('skill taxonomy search data contains common precise terms', () => {
+  const ctx = makeContext(baseProfile());
+  const text = expr(ctx, 'skillTaxonomy.flatMap(s => [s.label, ...(s.details||[])]).join(" | ")');
+  assert.match(text, /Excel/i);
+  assert.match(text, /JavaScript/i);
+  assert.match(text, /soudage/i);
+  assert.match(text, /CACES/i);
+});
+
+test('same skill family gives partial coverage instead of an exact match', () => {
+  const ctx = makeContext(baseProfile({ skillMacros: ['numerique-01'] }));
+  const score = expr(ctx, 'macroSkillCoverage(jobs.find(j => j.id === 13), profile.skillMacros)');
+  assert.ok(score > 0 && score < 100);
 });
