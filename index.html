@@ -100,8 +100,17 @@
       </div>
       <div class="block">
         <h2 class="subheading">Savoir-faire</h2>
-        <p class="hint">Sélectionnez ce que vous savez déjà faire. Nous utiliserons ces éléments pour mesurer la proximité avec chaque métier.</p>
-        <div class="tag-wrap" id="skillsTags"></div>
+        <p class="hint">La base de référence est beaucoup plus riche que ce qui peut être affiché à l'écran. JusteCap utilise ici une couche simplifiée de macro-compétences pour éviter une liste interminable. Recherchez un terme précis ou ouvrez une catégorie.</p>
+        <div class="skill-browser-toolbar">
+          <input id="skillSearch" type="search" placeholder="Rechercher une compétence, ex. Excel, accueil, soudage, JavaScript..." oninput="filterSkillBrowser()" onsearch="filterSkillBrowser()">
+          <button type="button" class="btn ghost" style="padding:9px 12px" onclick="clearSkillSearch()">Effacer</button>
+          <label class="toggle-line"><input id="showSkillDetails" type="checkbox" onchange="toggleSkillDetails()"> Afficher les précisions</label>
+          <span id="skillSelectionCount" class="skill-selected-badge">0 sélectionnée</span>
+        </div>
+        <div class="skill-browser-meta"><strong>167 compétences principales</strong> • 668 précisions recherchables • 15 catégories • couche UX JusteCap inspirée de la structure ROME</div>
+        <div id="skillSearchStatus" class="hint" style="margin-top:7px"></div>
+        <div id="skillsBrowser"></div>
+        <div id="skillsTags" style="display:none"></div>
       </div>
       <div class="block">
         <h2 class="subheading">Savoir-être</h2>
@@ -255,6 +264,7 @@
 <div class="modal-backdrop" id="dossierModal"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle" style="margin:0"></h2><div id="modalSubtitle" class="hint"></div></div><button class="xbtn" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
 
 <script src="assets/js/catalog.js"></script>
+<script src="assets/js/skills-taxonomy.js"></script>
 <script src="assets/js/matching-engine.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
