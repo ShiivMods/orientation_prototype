@@ -78,6 +78,7 @@ let profile={};
 let lastSentDossierRef=null;
 let selectedPastJobIds=[];
 let selectedSkillMacroState=new Set();
+let skillDiscoveryReturnStep=1;
 
 function escAttr(value){
   return String(value??"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
@@ -163,6 +164,8 @@ function selectedSkillBases(){
 }
 
 function init(){
+  document.documentElement.dataset.jobCount=String(jobs.length);
+  restorePastJobs();
   document.getElementById("steps").innerHTML = steps.map((s,i)=>`
     <div class="step ${i===0?'active':''}" data-stepnav="${i}">
       <div class="step-num">${i+1}</div><div><strong>${s[0]}</strong><br><span style="font-size:11px">${s[1]}</span></div>
@@ -198,7 +201,7 @@ function init(){
 
   const domains=[...new Set(jobs.map(j=>j.domain))].sort();
   document.getElementById("domainFilter").innerHTML += domains.map(d=>`<option>${d}</option>`).join("");
-  document.getElementById("pastJobSelect").innerHTML = `<option value="">Choisir un métier...</option>` + jobs.slice().sort((a,b)=>a.title.localeCompare(b.title,"fr")).map(j=>`<option value="${j.id}">${j.title}</option>`).join("");
+  document.getElementById("pastJobList").innerHTML = jobs.slice().sort((a,b)=>a.title.localeCompare(b.title,"fr")).map(j=>`<option value="${escAttr(j.title)}"></option>`).join("");
   seedDemoDossiers();
   updateNav();
 }
@@ -527,6 +530,8 @@ function resetDemoState(){
   localStorage.removeItem("justecapDemoStateVersion");
   localStorage.removeItem("orientationProDossiers");
   localStorage.removeItem("orientationProSeeded");
+  localStorage.removeItem("justecapPastJobIds");
+  localStorage.removeItem("orientationProPastJobIds");
   location.reload();
 }
 function makeRef(){const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",p=n=>Array.from({length:n},()=>c[Math.floor(Math.random()*c.length)]).join("");return `ORI-${p(4)}-${p(3)}`}
@@ -571,9 +576,42 @@ function sendResultsToAdvisor(){
   const arr=getDossiers();arr.unshift(d);setDossiers(arr);lastSentDossierRef=d.ref;
   box.innerHTML=`<div class="success"><strong>Dossier ajouté à l’espace conseiller de démonstration.</strong><br>Il est maintenant visible pour <strong>${esc(adv.firstName)} ${esc(adv.lastName)}</strong>, ${esc(inst.name)}.<br><span class="hint">Dans une version connectée, cette action transmettrait le dossier au compte du conseiller sélectionné.</span><br><br>Référence : <span class="codebox">${esc(d.ref)}</span></div>`;window.scrollTo({top:0,behavior:"smooth"});
 }
+function savePastJobs(){
+  try{localStorage.setItem("justecapPastJobIds",JSON.stringify(selectedPastJobIds))}catch(e){}
+  updatePastJobsFilterState();
+}
+function restorePastJobs(){
+  try{
+    const raw=localStorage.getItem("justecapPastJobIds")||localStorage.getItem("orientationProPastJobIds")||"[]";
+    const stored=JSON.parse(raw);
+    selectedPastJobIds=(Array.isArray(stored)?stored:[]).map(Number).filter(id=>jobs.some(j=>j.id===id));
+  }catch(e){selectedPastJobIds=[]}
+}
+function updatePastJobsFilterState(){
+  const checkbox=document.getElementById("hidePastJobs");
+  const help=document.getElementById("pastJobsFilterHelp");
+  if(!checkbox||!help) return;
+  const n=selectedPastJobIds.length;
+  checkbox.disabled=n===0;
+  if(!n){
+    checkbox.checked=false;
+    help.className="filter-help";
+    help.textContent="Pour utiliser ce filtre, ouvrez « Connaître MES compétences » et renseignez au moins un métier déjà exercé.";
+  }else{
+    help.className="filter-help good";
+    help.textContent=`${n} métier${n>1?"s":""} déjà pratiqué${n>1?"s":""} renseigné${n>1?"s":""} dans « Connaître MES compétences ».`;
+  }
+}
+function openSkillDiscoveryFromAptitudes(){
+  skillDiscoveryReturnStep=currentStep;
+  showSkillDiscovery();
+}
+function returnFromSkillDiscovery(){
+  goToStep(skillDiscoveryReturnStep??1);
+}
 function proposeSkillDiscovery(){
   const ok=confirm("Ouvrir le module « Connaître MES compétences » ?\n\nVotre progression actuelle dans le questionnaire sera conservée. Ce module est complémentaire et peut être utilisé indépendamment.");
-  if(ok) showSkillDiscovery();
+  if(ok) openSkillDiscoveryFromAptitudes();
 }
 function showSkillDiscovery(){
   document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
@@ -585,24 +623,40 @@ function showSkillDiscovery(){
   document.getElementById("pageTitle").textContent="Connaître MES compétences";
   document.getElementById("pageSubtitle").textContent="Retrouvez les compétences potentiellement acquises grâce à vos expériences professionnelles.";
   renderSelectedPastJobs();
+  updatePastJobsFilterState();
   window.scrollTo({top:0,behavior:"smooth"});
 }
 function addPastJob(){
-  const id=Number(document.getElementById("pastJobSelect").value);
-  if(!id || selectedPastJobIds.includes(id)) return;
-  selectedPastJobIds.push(id);
-  document.getElementById("pastJobSelect").value="";
+  const input=document.getElementById("pastJobSearch");
+  const error=document.getElementById("pastJobError");
+  const raw=(input?.value||"").trim();
+  const normalized=normalizeSearchText(raw);
+  if(!normalized){if(error)error.textContent="Indiquez un métier.";return}
+
+  let job=jobs.find(j=>normalizeSearchText(j.title)===normalized);
+  if(!job){
+    const partial=jobs.filter(j=>normalizeSearchText(j.title).includes(normalized));
+    if(partial.length===1) job=partial[0];
+  }
+  if(!job){if(error)error.textContent="Métier introuvable. Commencez à taper son nom puis choisissez une proposition de la liste.";return}
+  if(selectedPastJobIds.includes(job.id)){if(error)error.textContent="Ce métier est déjà ajouté.";return}
+
+  selectedPastJobIds.push(job.id);
+  savePastJobs();
+  if(input)input.value="";
+  if(error)error.textContent="";
   renderSelectedPastJobs();
 }
 function removePastJob(id){
   selectedPastJobIds=selectedPastJobIds.filter(x=>x!==id);
+  savePastJobs();
   renderSelectedPastJobs();
   if(!selectedPastJobIds.length) document.getElementById("skillDiscoveryResults").innerHTML='<div class="empty">Ajoutez au moins un métier que vous avez exercé pour commencer.</div>';
 }
 function renderSelectedPastJobs(){
   const box=document.getElementById("selectedPastJobs");
   if(!box) return;
-  box.innerHTML=selectedPastJobIds.length?selectedPastJobIds.map(id=>{const j=jobs.find(x=>x.id===id);return `<span class="selected-job">${j?.title||id}<button title="Retirer" onclick="removePastJob(${id})">×</button></span>`}).join(""):'<span class="hint">Aucun métier ajouté.</span>';
+  box.innerHTML=selectedPastJobIds.length?selectedPastJobIds.map(id=>{const j=jobs.find(x=>x.id===id);return `<span class="selected-job">${esc(j?.title||id)}<button title="Retirer" onclick="removePastJob(${id})">×</button></span>`}).join(""):'<span class="hint">Aucun métier ajouté.</span>';
 }
 function aggregatePotential(itemsKey){
   const map=new Map();
