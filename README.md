@@ -1,49 +1,72 @@
-# Orientation Pro / JusteCap
+# JusteCap — Orientation Pro
 
-Prototype fonctionnel d'un outil d'aide à l'orientation professionnelle destiné à rapprocher un profil bénéficiaire de pistes métiers et à faciliter le travail du conseiller.
+Démonstrateur d'aide à l'orientation professionnelle.
 
-> **Statut actuel : prototype pré-production.**
-> Ce dépôt ne doit pas encore être utilisé avec de vraies données bénéficiaires.
+> **Statut : version de démonstration.**
+> Cette version sert à présenter le fonctionnement et les choix de conception. Elle n'est pas présentée comme prête à être utilisée professionnellement et ne doit contenir que des données fictives.
 
-## État actuel
+## Ce que montre la démo
 
-Le prototype fonctionne côté navigateur et couvre notamment :
+- parcours bénéficiaire en plusieurs étapes ;
+- aptitudes, expériences, préférences et contraintes ;
+- indice interne de compatibilité avec des métiers de démonstration ;
+- règles d'accessibilité et cas réglementés ;
+- contexte territorial à partir d'indicateurs BMO ;
+- module « Connaître MES compétences » ;
+- simulation d'envoi à un conseiller et d'espace conseiller.
 
-- saisie du profil, des aptitudes, expériences et préférences ;
-- prise en compte structurée des limitations fonctionnelles ;
-- matching avec des métiers de démonstration ;
-- contexte local du marché du travail ;
-- découverte de compétences depuis des métiers déjà exercés ;
-- espace conseiller de démonstration ;
-- export de dossiers.
+## Structure
 
-Le stockage, l'authentification et plusieurs jeux de données sont encore simulés localement.
+```text
+index.html
+assets/
+  css/
+    app.css
+  js/
+    catalog.js
+    matching-engine.js
+    app.js
+tests/
+  matching-engine.test.js
+```
 
-## Lancer le prototype
+- `catalog.js` contient les référentiels et données de démonstration.
+- `matching-engine.js` contient le moteur de compatibilité et les calculs d'indicateurs.
+- `app.js` contient l'interface, les exports et les mécanismes spécifiques à la démo.
+- `app.css` contient la présentation.
 
-Aucune compilation n'est nécessaire à ce stade.
+## Lancer localement
 
-Ouvrir `index.html` depuis un serveur HTTP local, par exemple avec une extension de serveur statique ou un outil équivalent.
+Servir le dossier avec un serveur HTTP statique, par exemple :
 
-Le JavaScript applicatif est chargé depuis `app.js`.
+```bash
+python -m http.server 8000
+```
 
-## Règles de développement
+Puis ouvrir `http://localhost:8000`.
 
-- `main` représente la version destinée au déploiement.
-- Les changements doivent être développés sur une branche dédiée puis relus avant fusion.
-- Aucun secret, mot de passe réel ou donnée personnelle réelle ne doit être commité.
-- Les données sensibles ne doivent pas être conservées dans `localStorage` en production.
-- Les changements de logique métier importants doivent être documentés dans `DECISIONS.md`.
-- Une fonctionnalité n'est pas considérée prête pour la production simplement parce qu'elle fonctionne dans le prototype.
+## Vérifications
 
-## Documentation
+```bash
+node --check assets/js/catalog.js
+node --check assets/js/matching-engine.js
+node --check assets/js/app.js
+node --test tests/matching-engine.test.js
+```
 
-- [SECURITY.md](SECURITY.md) — règles de sécurité et limites actuelles.
-- [DECISIONS.md](DECISIONS.md) — décisions d'architecture et de produit.
-- [docs/PRODUCTION_READINESS.md](docs/PRODUCTION_READINESS.md) — trajectoire vers une version exploitable en production.
+Les mêmes contrôles sont exécutés par GitHub Actions.
 
-## Déploiement
+## Données et sécurité
 
-Le dépôt dispose actuellement d'un workflow GitHub Pages déclenché depuis `main`.
+- Utiliser uniquement des données fictives dans la démonstration publique.
+- L'authentification conseiller et le stockage navigateur sont des simulations de démonstration.
+- Les chiffres BMO affichés comme tels sont des données territoriales de source France Travail.
+- L'indice local /100 est un calcul interne de démonstration et non une statistique France Travail.
+- Une future version professionnelle nécessitera persistance serveur, authentification réelle, autorisations, politique de conservation et cadrage RGPD.
 
-GitHub Pages reste adapté à la démonstration statique actuelle. Une vraie version multi-utilisateur nécessitera un backend, une base de données, une authentification robuste et une politique de traitement des données adaptée.
+Voir également :
+
+- [SECURITY.md](SECURITY.md)
+- [DECISIONS.md](DECISIONS.md)
+- [docs/PREFLIGHT_AUDIT.md](docs/PREFLIGHT_AUDIT.md)
+- [docs/PRODUCTION_READINESS.md](docs/PRODUCTION_READINESS.md)
