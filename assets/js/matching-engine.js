@@ -125,6 +125,14 @@ function accessibilityAssessment(job){
   return {hard,warnings,penalty,status,label,blocked:hard.length>0};
 }
 
+function primaryMacroForBase(base){
+  return (skillTaxonomyByBase.get(base)||[])[0]||null;
+}
+
+function stableHash(str){
+  return stableSkillHash(str);
+}
+
 function stableSkillHash(str){
   let h=2166136261;
   for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}
