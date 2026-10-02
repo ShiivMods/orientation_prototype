@@ -20,6 +20,7 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check assets/js/catalog.js
+          node --check assets/js/skills-taxonomy.js
           node --check assets/js/matching-engine.js
           node --check assets/js/app.js
 
@@ -30,6 +31,7 @@ jobs:
         run: |
           grep -q 'assets/css/app.css' index.html
           grep -q 'assets/js/catalog.js' index.html
+          grep -q 'assets/js/skills-taxonomy.js' index.html
           grep -q 'assets/js/matching-engine.js' index.html
           grep -q 'assets/js/app.js' index.html
           if grep -q 'function advisorLogin' index.html; then
