@@ -84,7 +84,7 @@
           <label class="field"><span>Établissement</span><select id="institution" onchange="updateAdvisorOptions()"><option value="">Aucun / je ne sais pas</option></select></label>
           <label class="field"><span>Conseiller d'insertion</span><select id="advisor"><option value="">Aucun / je ne sais pas</option></select></label>
         </div>
-        <div class="institution-note">Exemple intégré au prototype : <strong>Enefa - Caen</strong>, avec Cyril Brunet et Alain Langlois.</div>
+        <div class="institution-note">Exemple intégré à la démonstration : <strong>Enefa - Caen</strong>, avec un compte conseiller fictif.</div>
       </div>
       <div id="profileValidation" class="validation-error" role="alert"></div>
       <div class="actions"><span></span><button class="btn primary" onclick="nextStep()">Continuer</button></div>
@@ -222,10 +222,10 @@
         <div>
           <h2 style="margin-top:0">Espace conseiller</h2>
           <p class="hint">Le bénéficiaire n'a pas besoin de compte. Le conseiller, lui, se connecte pour consulter les dossiers qui lui sont rattachés.</p>
-          <div class="notice"><strong>Comptes de démonstration</strong><br>cyril.brunet / demo<br>alain.langlois / demo</div>
+          <div class="notice"><strong>Compte de démonstration</strong><br>conseiller.demo / demo</div>
         </div>
         <div>
-          <label class="field"><span>Identifiant</span><input id="loginUser" placeholder="cyril.brunet"></label>
+          <label class="field"><span>Identifiant</span><input id="loginUser" placeholder="conseiller.demo"></label>
           <label class="field" style="margin-top:12px"><span>Mot de passe</span><input id="loginPass" type="password" placeholder="demo"></label>
           <div id="loginError" class="hint" style="color:var(--bad);margin-top:8px"></div>
           <button class="btn primary" style="width:100%;margin-top:16px" onclick="advisorLogin()">Se connecter</button>
