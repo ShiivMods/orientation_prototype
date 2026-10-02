@@ -105,3 +105,21 @@ test('Caen BMO demo data matches the published 2026 values', () => {
   assert.equal(caen.difficulty, 43.2);
   assert.equal(caen.seasonal, 30.3);
 });
+
+
+test('key demo jobs expose verified ROME references', () => {
+  const ctx = makeContext(baseProfile());
+  const refs = expr(ctx, 'Object.fromEntries(jobs.map(j => [j.id, j.rome]))');
+  assert.equal(refs[1], 'K1801');
+  assert.equal(refs[2], 'I1401');
+  assert.equal(refs[3], 'N1103');
+  assert.equal(refs[13], 'M1805');
+  assert.equal(refs[20], 'I1604');
+  assert.equal(refs[21], 'N4103');
+});
+
+test('generic demo job titles are not forced into a ROME family', () => {
+  const ctx = makeContext(baseProfile());
+  const refs = expr(ctx, '[jobs.find(j=>j.id===4).rome, jobs.find(j=>j.id===5).rome, jobs.find(j=>j.id===9).rome]');
+  assert.deepEqual(Array.from(refs), [null, null, null]);
+});
