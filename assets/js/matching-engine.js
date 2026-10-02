@@ -151,7 +151,6 @@ function scoreJob(job){
 }
 
 function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
-function stableLocalFactor(text){let h=2166136261;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619)}return 0.90+((h>>>0)%21)/100}
 function marketLabel(index){if(index>=80)return "Très fort";if(index>=65)return "Fort";if(index>=50)return "Moyen";if(index>=35)return "Faible";return "Très faible"}
 function localMarketForBasin(job,basin){
   const maxProjects=16006;
@@ -161,9 +160,9 @@ function localMarketForBasin(job,basin){
   const nonSeasonal=1-basin.seasonal/100;
   const trend=clamp((basin.change+25.7)/(13+25.7),0,1);
   const baseDemand=clamp(job.demand/10,0,1);
-  // Couche métier encore simulée dans le prototype. Les indicateurs territoriaux BMO sont réels.
-  const localFactor=stableLocalFactor(basin.id+"|"+job.domain);
-  const raw=(baseDemand*45 + volume*20 + propensity*15 + difficulty*10 + nonSeasonal*5 + trend*5)*localFactor;
+  // Indice interne de démonstration : il combine un niveau de demande métier fictif
+  // avec des indicateurs territoriaux BMO réels. Il ne s'agit pas d'une statistique France Travail.
+  const raw=baseDemand*45 + volume*20 + propensity*15 + difficulty*10 + nonSeasonal*5 + trend*5;
   const index=clamp(Math.round(raw),5,100);
   return {index,label:marketLabel(index),basin,nonSeasonal:100-basin.seasonal};
 }
