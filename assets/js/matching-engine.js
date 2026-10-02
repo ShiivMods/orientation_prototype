@@ -124,14 +124,65 @@ function accessibilityAssessment(job){
   return {hard,warnings,penalty,status,label,blocked:hard.length>0};
 }
 
+function stableSkillHash(str){
+  let h=2166136261;
+  for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}
+  return Math.abs(h>>>0);
+}
+
+function jobMacroRequirements(job){
+  if(job._macroReq) return job._macroReq;
+  const out=[];
+  (job.skills||[]).forEach(base=>{
+    const candidates=skillTaxonomyByBase.get(base)||[];
+    if(!candidates.length) return;
+    const idx=stableSkillHash(job.title+"|"+base)%candidates.length;
+    out.push(candidates[idx].id);
+    if(candidates.length>=6 && stableSkillHash(base+"|"+job.title)%3===0){
+      const offset=1+(stableSkillHash(job.domain)%Math.max(1,candidates.length-1));
+      out.push(candidates[(idx+offset)%candidates.length].id);
+    }
+  });
+  job._macroReq=[...new Set(out)];
+  return job._macroReq;
+}
+
+function macroSkillCoverage(job,selectedMacroIds){
+  if(!selectedMacroIds?.length) return null;
+  const required=jobMacroRequirements(job);
+  if(!required.length) return null;
+  const selected=new Set(selectedMacroIds);
+  let total=0;
+
+  required.forEach(reqId=>{
+    if(selected.has(reqId)){total+=1;return}
+    const req=skillById.get(reqId);
+    if(!req) return;
+
+    const sameBase=selectedMacroIds.some(id=>skillById.get(id)?.base===req.base);
+    if(sameBase){total+=0.62;return}
+
+    const sameCategory=selectedMacroIds.some(id=>skillById.get(id)?.category===req.category);
+    if(sameCategory) total+=0.18;
+  });
+
+  return Math.round(Math.pow(total/required.length,1.08)*100);
+}
+
 function scoreJob(job){
-  const selectedSkills=profile.skills||[];
+  const selectedMacros=profile.skillMacros||[];
   const selectedSoft=profile.soft||[];
   const selectedQualities=profile.qualitiesSelected||[];
-  const matchedSkills=job.skills.filter(s=>selectedSkills.includes(s));
+  const requiredMacros=jobMacroRequirements(job);
+  const selectedMacroSet=new Set(selectedMacros);
+
+  const matchedSkills=requiredMacros
+    .filter(id=>selectedMacroSet.has(id) || selectedMacros.some(sel=>skillById.get(sel)?.base===skillById.get(id)?.base))
+    .map(id=>skillById.get(id)?.label)
+    .filter(Boolean);
   const matchedSoft=job.soft.filter(s=>selectedSoft.includes(s));
 
-  const skillScore=selectedSkills.length && job.skills.length ? matchedSkills.length/job.skills.length*100 : null;
+  const skillScore=macroSkillCoverage(job,selectedMacros);
   const softScore=selectedSoft.length && job.soft.length ? matchedSoft.length/job.soft.length*100 : null;
   const qualityMatches=selectedQualities.filter(q=>(qualityToSoft[q]||[]).some(s=>job.soft.includes(s)));
   const qualityScore=selectedQualities.length ? qualityMatches.length/selectedQualities.length*100 : null;
@@ -166,7 +217,7 @@ function scoreJob(job){
   if(salaryGap){
     const p=Math.min(16,Math.max(2,Math.ceil(salaryGap/100)*2));
     accessPenalty+=p;
-    accessReasons.push(`Salaire indicatif inférieur au minimum souhaité (-${p})`);
+    accessReasons.push(`Salaire de référence démo inférieur au minimum souhaité (-${p})`);
   }
 
   base-=Math.min(40,accessPenalty);
@@ -186,7 +237,7 @@ function scoreJob(job){
     defectPenalty:traits.defectPenalty,defectMatches:traits.defectMatches,
     accessibilityPenalty:accessibility.penalty,accessibility,
     accessPenalty:Math.min(40,accessPenalty),accessReasons,
-    matchedSkills,matchedSoft,breakdown,
+    requiredMacros,matchedSkills,matchedSoft,breakdown,
     conflicts:pref.conflicts};
 }
 
