@@ -74,10 +74,6 @@
             <div class="hint">Ces choix influencent directement les métiers proposés. Ils évitent de supposer automatiquement ce qu'une personne peut ou ne peut pas faire à partir du seul nom de son handicap.</div>
             <div class="tag-wrap" id="functionalLimitTags"></div>
           </div>
-
-          <label class="field" style="margin-top:15px"><span>Précisions ou aménagements nécessaires</span>
-            <textarea id="disabilityNotes" placeholder="Facultatif. Ex. poste accessible en fauteuil, lecteur d'écran, absence de port de charges..."></textarea>
-          </label>
           <div class="hint" style="margin-top:8px">Pour une profession soumise à une aptitude médicale ou réglementaire, Orientation Pro signale qu'une vérification est nécessaire. L'application ne remplace pas un avis médical.</div>
         </div>
       </div>
@@ -167,7 +163,7 @@
               <option value="apprenticeship">Alternance disponible</option>
             </select>
           </div>
-          <div class="filter-row"><label>Recrutement minimum</label>
+          <div class="filter-row"><label>Indice local minimum <span class="hint">(démo)</span></label>
             <select id="demandFilter" onchange="renderJobs()">
               <option value="0">Tous</option><option value="50">Moyen ou mieux</option><option value="65">Fort ou mieux</option><option value="80">Très fort</option>
             </select>
@@ -184,7 +180,7 @@
           <div class="filter-row"><label>Trier par</label>
             <select id="sortFilter" onchange="renderJobs()">
               <option value="score">Meilleure compatibilité</option>
-              <option value="demand">Recrutement local : du + au -</option>
+              <option value="demand">Indice local de démonstration : du + au -</option>
               <option value="training">Formation la plus courte</option>
               <option value="salary">Salaire indicatif</option>
               <option value="interest">Affinité loisirs</option>
