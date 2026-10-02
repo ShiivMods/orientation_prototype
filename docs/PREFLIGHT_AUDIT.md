@@ -117,10 +117,10 @@ tests/
 - [x] CI adaptée à la nouvelle structure.
 - [x] Vocabulaire « Points de vigilance » adopté dans l'interface.
 - [x] Statut « Version de démonstration » adopté.
-- [ ] Corriger la présentation de l'indice local afin qu'aucun calcul interne ne ressemble à une statistique officielle.
-- [ ] Vérifier les champs sensibles et retirer les informations libres inutiles.
-- [ ] Auditer les sorties HTML alimentées par des saisies utilisateur.
+- [x] Corriger la présentation de l'indice local afin qu'aucun calcul interne ne ressemble à une statistique officielle.
+- [x] Vérifier les champs sensibles et retirer les informations libres inutiles.
+- [x] Auditer les sorties HTML alimentées par des saisies utilisateur.
 - [ ] Effectuer un smoke test complet du parcours après refonte.
-- [ ] Mettre à jour le README avec la structure actuelle et le mode de démonstration.
+- [x] Mettre à jour le README avec la structure actuelle et le mode de démonstration.
 
 La pré-étape n'est terminée qu'une fois les éléments restants validés.
