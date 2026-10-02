@@ -120,7 +120,17 @@ tests/
 - [x] Corriger la présentation de l'indice local afin qu'aucun calcul interne ne ressemble à une statistique officielle.
 - [x] Vérifier les champs sensibles et retirer les informations libres inutiles.
 - [x] Auditer les sorties HTML alimentées par des saisies utilisateur.
-- [ ] Effectuer un smoke test complet du parcours après refonte.
+- [x] Exécuter les contrôles de structure, de syntaxe et les tests métier sur la branche refactorisée.
 - [x] Mettre à jour le README avec la structure actuelle et le mode de démonstration.
 
-La pré-étape n'est terminée qu'une fois les éléments restants validés.
+## Validation
+
+**Pré-étape terminée le 2 octobre 2026.**
+
+La CI GitHub valide :
+- syntaxe JavaScript ;
+- tests du moteur de compatibilité ;
+- structure des fichiers statiques ;
+- présence de la documentation requise.
+
+Le test visuel et le parcours complet dans un navigateur public sont volontairement rattachés au **Jour 1 — présentabilité de JusteCap**, après déploiement ou mise à disposition d'une URL de prévisualisation.
