@@ -161,11 +161,17 @@
     <section class="section" data-step="4">
       <div id="saveNotice"></div>
       <div id="marketContext"></div>
+      <div class="notice" style="margin-bottom:14px">
+        <strong>Comment lire les résultats ?</strong><br>
+        La démonstration explore désormais plusieurs centaines de métiers. Les 21 fiches principales sont enrichies ; le reste constitue un catalogue secondaire de démonstration destiné à montrer la largeur de l'exploration. Une moyenne faible sur toute la base n'indique pas un mauvais profil : regardez surtout les meilleures correspondances.
+      </div>
+      <div id="profileReliability"></div>
       <div class="kpi" id="kpis"></div>
       <div class="results-layout">
         <div class="panel filters">
           <h2 class="subheading">Filtres & tri</h2>
           <div class="filter-help" style="margin-bottom:14px">Les références ROME et les données BMO identifiées comme France Travail sont sourcées. Les durées de formation et salaires utilisés par cette démo restent des estimations du modèle.</div>
+          <div class="filter-row"><label>Rechercher un métier</label><input id="jobSearch" type="search" placeholder="Ex. plombier, santé, informatique..." oninput="renderJobs()"></div>
           <div class="filter-row"><label>Domaine</label><select id="domainFilter" onchange="renderJobs()"><option value="">Tous les domaines</option></select></div>
           <div class="filter-row"><label>Accès</label>
             <select id="accessFilter" onchange="renderJobs()">
@@ -186,8 +192,14 @@
             </select>
           </div>
           <div class="filter-row">
+            <label>Expérience passée</label>
+            <label class="toggle-line"><input id="hidePastJobs" type="checkbox" onchange="renderJobs()"> Masquer les métiers déjà pratiqués</label>
+            <div id="pastJobsFilterHelp" class="filter-help">Pour utiliser ce filtre, ouvrez « Connaître MES compétences » et renseignez au moins un métier déjà exercé.</div>
+          </div>
+          <div class="filter-row">
             <label>Handicap & accessibilité</label>
             <label class="toggle-line"><input id="showBlockedJobs" type="checkbox" onchange="renderJobs()"> Afficher aussi les métiers écartés par mes limitations déclarées</label>
+            <div id="blockedJobsFilterHelp" class="filter-help"></div>
           </div>
           <div class="filter-row"><label>Trier par</label>
             <select id="sortFilter" onchange="renderJobs()">
@@ -204,6 +216,7 @@
           <button class="btn ghost" style="width:100%" onclick="goToStep(3)">Modifier mon profil</button>
         </div>
         <div>
+          <div id="resultCount" class="result-count"></div>
           <div class="job-list" id="jobList"></div>
         </div>
       </div>
@@ -212,13 +225,21 @@
     <section class="section" id="skillDiscoverySection">
       <div class="skill-discovery-shell">
         <div class="panel">
-          <h2 style="margin-top:0">Connaître MES compétences</h2>
-          <p class="hint">Ce module est indépendant du questionnaire d'orientation. Indiquez un ou plusieurs métiers que vous avez exercés. L'application vous proposera les compétences que ces expériences ont pu vous permettre d'acquérir.</p>
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+            <h2 style="margin:0">Connaître MES compétences</h2>
+            <button class="btn ghost" type="button" onclick="returnFromSkillDiscovery()">Retour à mes aptitudes</button>
+          </div>
+          <p class="hint">Ce module est indépendant du questionnaire d'orientation. Indiquez un ou plusieurs métiers que vous avez exercés. L'application utilise la même taxonomie détaillée que le questionnaire principal pour proposer des compétences potentielles.</p>
           <div class="notice">Une compétence affichée ici reste une <strong>hypothèse à confirmer</strong>. Avoir occupé un métier ne signifie pas avoir pratiqué ou maîtrisé toutes ses compétences.</div>
           <div class="job-picker">
-            <label class="field"><span>Métier exercé</span><select id="pastJobSelect"></select></label>
+            <label class="field">
+              <span>Métier exercé</span>
+              <input id="pastJobSearch" list="pastJobList" placeholder="Tapez le nom d'un métier..." autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();addPastJob()}">
+              <datalist id="pastJobList"></datalist>
+            </label>
             <button class="btn primary" onclick="addPastJob()">Ajouter</button>
           </div>
+          <div id="pastJobError" class="validation-error" role="alert"></div>
           <div class="selected-jobs" id="selectedPastJobs"></div>
           <div class="actions" style="justify-content:flex-end"><button class="btn primary" onclick="analyzePastJobs()">Afficher mes compétences potentielles</button></div>
         </div>
@@ -265,6 +286,7 @@
 
 <script src="assets/js/catalog.js"></script>
 <script src="assets/js/skills-taxonomy.js"></script>
+<script src="assets/js/jobs-large.js"></script>
 <script src="assets/js/matching-engine.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
