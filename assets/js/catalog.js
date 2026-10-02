@@ -358,6 +358,6 @@ jobs.forEach(job=>{
   job.officialTitle=meta.officialTitle||null;
   job.sourceNote=meta.note||null;
   job.officialAccess=meta.officialAccess||null;
-  job.romeUrl=job.rome?`https://candidat.francetravail.fr/metierscope/fiche-metier/${job.rome}/m`:null;
+  job.romeUrl=job.rome?`https://candidat.francetravail.fr/offres/recherche?rome=${job.rome}`:null;
 });
 
