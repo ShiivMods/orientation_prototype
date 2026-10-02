@@ -91,3 +91,12 @@ Ce fichier garde la trace du **pourquoi** des choix importants afin d'éviter qu
 - **Statut :** accepté
 - **Décision :** JusteCap et D&D CV sont déployés séparément. JusteCap fournit seulement un lien vers D&D CV.
 - **Pourquoi :** une panne ou une évolution d'un démonstrateur ne doit pas rendre l'autre indisponible.
+
+
+## ADR-012 — Séparer données officielles et estimations de démonstration
+- **Date :** 2026-10-02
+- **Statut :** accepté
+- **Contexte :** les premières fiches métiers mélangeaient des données de démonstration et des références publiques sans distinction suffisante.
+- **Décision :** afficher explicitement les références ROME/France Travail lorsqu'un rattachement est fiable, et identifier comme « démo » toute estimation interne encore utilisée (durée de formation, salaire de référence, indice local calculé).
+- **Pourquoi :** éviter qu'une valeur construite pour montrer le fonctionnement soit interprétée comme une donnée officielle.
+- **Conséquences :** les notes artificielles d'évolution /10 et les affirmations génériques d'alternance sont retirées de l'interface. Un intitulé trop générique reste sans code ROME plutôt que d'être rattaché arbitrairement.
