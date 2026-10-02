@@ -291,7 +291,8 @@ function readProfile(){
     maxTraining:Number(document.getElementById("maxTraining").value),
     salary:Number(document.getElementById("salary").value),
     skillMacros:selectedSkillMacroIds(),
-    skills:selectedSkillBases(),
+    skillBases:selectedSkillBases(),
+    skills:selectedSkillMacroIds().map(id=>skillById.get(id)?.label).filter(Boolean),
     soft:[...document.querySelectorAll('input[name="soft"]:checked')].map(x=>x.value),
     qualitiesSelected:[...document.querySelectorAll('input[name="qualitiesSelected"]:checked')].map(x=>x.value),
     defectsSelected:[...document.querySelectorAll('input[name="defectsSelected"]:checked')].map(x=>x.value),
@@ -451,7 +452,7 @@ function renderJobs(){
             <div class="summary-card">
               <strong>À développer</strong>
               <ul class="small-list">
-                ${j.skills.filter(s=>!profile.skills.includes(s)).slice(0,6).map(x=>`<li>${x}</li>`).join("") || "<li>Peu d'écarts identifiés</li>"}
+                ${(j.match.requiredMacros||[]).filter(id=>!(profile.skillMacros||[]).includes(id)).slice(0,6).map(id=>`<li>${esc(skillById.get(id)?.label||id)}</li>`).join("") || "<li>Peu d'écarts identifiés</li>"}
               </ul>
             </div>
             <div class="market-card">
