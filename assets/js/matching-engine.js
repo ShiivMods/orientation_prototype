@@ -5,12 +5,13 @@
  */
 
 function preferenceScore(job){
-  let total=0, max=0, conflicts=0;
+  let total=0, max=0, conflicts=0, activeCount=0;
   const userMap={want:1,neutral:0,avoid:-1,impossible:-2};
   Object.keys(job.prefs).forEach(k=>{
     const u=userMap[profile.prefs[k]||"neutral"];
     const j=job.prefs[k];
     if(u===0)return;
+    activeCount++;
     max+=2;
     if(u===1){
       total += j===1?2:j===0?1:0;
@@ -21,14 +22,14 @@ function preferenceScore(job){
       total += j===-1?2:j===0?1:0;
     }
   });
-  return {score:max?Math.round((total/max)*100):75, conflicts};
+  return {score:max?Math.round((total/max)*100):null, conflicts, activeCount};
 }
 
 function interestBonus(job){
   const selected=profile.hobbiesSelected||[];
   const interests=jobInterestMap[job.title]||[];
   const matches=interests.filter(x=>selected.includes(x));
-  return {bonus:Math.min(10,matches.length*3),matches};
+  return {bonus:Math.min(5,matches.length*2),matches};
 }
 
 function experienceBonus(job){
@@ -49,7 +50,7 @@ function experienceBonus(job){
   match("remote",job.prefs.remote===1);
   match("routine",job.prefs.routine===1);
   match("screen",job.skills.includes("Utiliser des outils numériques") || job.skills.includes("Gérer des données"));
-  return {bonus:Math.min(8,matched.length*2),matches:matched};
+  return {bonus:Math.min(6,Math.round(matched.length*1.5)),matches:matched};
 }
 
 function traitAdjustment(job){
@@ -60,7 +61,7 @@ function traitAdjustment(job){
     const mapped=qualityToSoft[q]||[];
     if(mapped.some(s=>job.soft.includes(s))) qualityMatches.push(q);
   });
-  const qualityBonus=Math.min(6,qualityMatches.length*2);
+  const qualityBonus=Math.min(3,qualityMatches.length);
   let defectPenalty=0;
   const defectMatches=[];
   defects.forEach(d=>{
@@ -124,29 +125,68 @@ function accessibilityAssessment(job){
 }
 
 function scoreJob(job){
-  const matchedSkills=job.skills.filter(s=>profile.skills.includes(s));
-  const matchedSoft=job.soft.filter(s=>profile.soft.includes(s));
-  const skillScore=job.skills.length?matchedSkills.length/job.skills.length*100:50;
-  const softScore=job.soft.length?matchedSoft.length/job.soft.length*100:50;
+  const selectedSkills=profile.skills||[];
+  const selectedSoft=profile.soft||[];
+  const selectedQualities=profile.qualitiesSelected||[];
+  const matchedSkills=job.skills.filter(s=>selectedSkills.includes(s));
+  const matchedSoft=job.soft.filter(s=>selectedSoft.includes(s));
+
+  const skillScore=selectedSkills.length && job.skills.length ? matchedSkills.length/job.skills.length*100 : null;
+  const softScore=selectedSoft.length && job.soft.length ? matchedSoft.length/job.soft.length*100 : null;
+  const qualityMatches=selectedQualities.filter(q=>(qualityToSoft[q]||[]).some(s=>job.soft.includes(s)));
+  const qualityScore=selectedQualities.length ? qualityMatches.length/selectedQualities.length*100 : null;
   const pref=preferenceScore(job);
-  const accessEducation=profile.education>=job.education?100:Math.max(20,100-(job.education-profile.education)*25);
-  const trainingFit=profile.maxTraining>=job.training?100:Math.max(0,100-(job.training-profile.maxTraining)*8);
-  const salaryFit=profile.salary<=job.salary?100:Math.max(20,100-(profile.salary-job.salary)/12);
-  let base=skillScore*.28+softScore*.18+pref.score*.27+accessEducation*.10+trainingFit*.10+salaryFit*.07;
-  base -= pref.conflicts*12;
+
+  const dimensions=[];
+  if(skillScore!==null) dimensions.push(["Savoir-faire",skillScore,50]);
+  if(softScore!==null) dimensions.push(["Savoir-être",softScore,25]);
+  if(qualityScore!==null) dimensions.push(["Qualités",qualityScore,15]);
+  if(pref.score!==null) dimensions.push(["Préférences",pref.score,25]);
+
+  const totalWeight=dimensions.reduce((sum,[,,weight])=>sum+weight,0);
+  let base=totalWeight
+    ? dimensions.reduce((sum,[,score,weight])=>sum+score*weight,0)/totalWeight
+    : 0;
+
+  const accessReasons=[];
+  let accessPenalty=0;
+  const educationGap=Math.max(0,job.education-(profile.education||0));
+  if(educationGap){
+    const p=Math.min(18,educationGap*6);
+    accessPenalty+=p;
+    accessReasons.push(`Niveau d'accès supérieur au niveau déclaré (-${p})`);
+  }
+  const trainingGap=Math.max(0,job.training-(profile.maxTraining||0));
+  if(trainingGap){
+    const p=Math.min(24,8+Math.round(trainingGap));
+    accessPenalty+=p;
+    accessReasons.push(`Formation estimée plus longue que la durée acceptée (-${p})`);
+  }
+  const salaryGap=Math.max(0,(profile.salary||0)-job.salary);
+  if(salaryGap){
+    const p=Math.min(16,Math.max(2,Math.ceil(salaryGap/100)*2));
+    accessPenalty+=p;
+    accessReasons.push(`Salaire indicatif inférieur au minimum souhaité (-${p})`);
+  }
+
+  base-=Math.min(40,accessPenalty);
+  base-=pref.conflicts*12;
   base=Math.max(0,Math.min(99,Math.round(base)));
+
   const interest=interestBonus(job);
   const experience=experienceBonus(job);
   const traits=traitAdjustment(job);
   const accessibility=accessibilityAssessment(job);
   const total=accessibility.blocked?0:Math.max(0,Math.min(100,base+interest.bonus+experience.bonus+traits.qualityBonus-traits.defectPenalty-accessibility.penalty));
+
+  const breakdown=Object.fromEntries(dimensions.map(([name,score])=>[name,Math.round(score)]));
   return {total,base,interestBonus:interest.bonus,interestMatches:interest.matches,
     experienceBonus:experience.bonus,experienceMatches:experience.matches,
     qualityBonus:traits.qualityBonus,qualityMatches:traits.qualityMatches,
     defectPenalty:traits.defectPenalty,defectMatches:traits.defectMatches,
     accessibilityPenalty:accessibility.penalty,accessibility,
-    matchedSkills,matchedSoft,
-    breakdown:{"Savoir-faire":Math.round(skillScore),"Savoir-être":Math.round(softScore),"Préférences":Math.round(pref.score),"Accessibilité formation":Math.round((accessEducation+trainingFit)/2)},
+    accessPenalty:Math.min(40,accessPenalty),accessReasons,
+    matchedSkills,matchedSoft,breakdown,
     conflicts:pref.conflicts};
 }
 
@@ -155,14 +195,13 @@ function marketLabel(index){if(index>=80)return "Très fort";if(index>=65)return
 function localMarketForBasin(job,basin){
   const maxProjects=16006;
   const volume=Math.log1p(basin.projects)/Math.log1p(maxProjects);
-  const propensity=basin.propensity/28.3;
   const difficulty=basin.difficulty/66;
   const nonSeasonal=1-basin.seasonal/100;
   const trend=clamp((basin.change+25.7)/(13+25.7),0,1);
   const baseDemand=clamp(job.demand/10,0,1);
   // Indice interne de démonstration : il combine un niveau de demande métier fictif
   // avec des indicateurs territoriaux BMO réels. Il ne s'agit pas d'une statistique France Travail.
-  const raw=baseDemand*45 + volume*20 + propensity*15 + difficulty*10 + nonSeasonal*5 + trend*5;
+  const raw=baseDemand*55 + volume*20 + difficulty*12 + nonSeasonal*8 + trend*5;
   const index=clamp(Math.round(raw),5,100);
   return {index,label:marketLabel(index),basin,nonSeasonal:100-basin.seasonal};
 }
