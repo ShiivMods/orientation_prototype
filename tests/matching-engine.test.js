@@ -150,3 +150,24 @@ test('same skill family gives partial coverage instead of an exact match', () =>
   const score = expr(ctx, 'macroSkillCoverage(jobs.find(j => j.id === 13), profile.skillMacros)');
   assert.ok(score > 0 && score < 100);
 });
+
+
+test('explicit job skill mappings stay semantically coherent for demo-critical jobs', () => {
+  const ctx = makeContext(baseProfile());
+  const dev = expr(ctx, 'jobMacroRequirements(jobs.find(j=>j.id===13)).map(id=>skillById.get(id).label)');
+  const bus = expr(ctx, 'jobMacroRequirements(jobs.find(j=>j.id===21)).map(id=>skillById.get(id).label)');
+  const cook = expr(ctx, 'jobMacroRequirements(jobs.find(j=>j.id===17)).map(id=>skillById.get(id).label)');
+  assert.ok(dev.includes('Développer une application web'));
+  assert.ok(dev.includes('Créer une interface web'));
+  assert.ok(bus.includes('Conduire un véhicule de transport collectif'));
+  assert.ok(bus.includes('Prendre en charge des passagers'));
+  assert.ok(cook.includes("Respecter des règles d'hygiène"));
+  assert.ok(!dev.includes('Retoucher une image'));
+  assert.ok(!cook.includes('Contrôler un accès'));
+});
+
+test('every current demo job has an explicit macro-skill mapping', () => {
+  const ctx = makeContext(baseProfile());
+  const missing = expr(ctx, 'jobs.filter(j=>!Array.isArray(j.skillMacroIds)||!j.skillMacroIds.length).map(j=>j.title)');
+  assert.deepEqual(Array.from(missing), []);
+});
