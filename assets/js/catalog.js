@@ -90,8 +90,7 @@ const prefValues = [
 
 const institutions = [
   {id:"enefa-caen",name:"Enefa - Caen",advisors:[
-    {id:"cyril-brunet",firstName:"Cyril",lastName:"Brunet",login:"cyril.brunet"},
-    {id:"alain-langlois",firstName:"Alain",lastName:"Langlois",login:"alain.langlois"}
+    {id:"demo-advisor",firstName:"Conseiller",lastName:"Démo",login:"conseiller.demo"}
   ]},
   {id:"structure-demo-lisieux",name:"Structure Démo - Lisieux",advisors:[
     {id:"marie-dupont",firstName:"Marie",lastName:"Dupont",login:"marie.dupont"}
