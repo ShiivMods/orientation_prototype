@@ -47,19 +47,47 @@ Ce fichier garde la trace du **pourquoi** des choix importants afin d'éviter qu
 - **Pourquoi :** réduire les régressions et distinguer clairement expérimentation et version déployable.
 - **Conséquences :** CI, tests, sécurité et documentation deviennent des exigences du projet.
 
-## ADR-005 — La V0.16 est la baseline fonctionnelle à restaurer
-- **Date :** 2026-09-30
+## ADR-005 — Baseline fonctionnelle du dépôt
+- **Date :** 2026-10-02
 - **Statut :** accepté
-- **Contexte :** le dépôt GitHub a été initialisé avec une version V0.9 alors qu'une V0.16 plus avancée existe dans les fichiers de travail.
-- **Décision :** ne pas refactoriser la V0.9 comme source fonctionnelle finale. Restaurer la V0.16 dans Git avant la réécriture structurelle.
-- **Pourquoi :** la V0.16 contient des évolutions déjà validées : taxonomie de compétences, base métier étendue, recherche, filtres, impression conseiller et scoring recalibré.
-- **Conséquences :** toute refonte doit préserver les comportements validés de la V0.16 ou documenter explicitement leur remplacement.
+- **Contexte :** plusieurs archives historiques du prototype existent.
+- **Décision :** le ZIP fourni le 2 octobre, correspondant à `main` au commit `371ece4`, est la source de vérité fonctionnelle.
+- **Pourquoi :** c'est la version explicitement désignée comme version actuelle.
+- **Conséquences :** les anciennes archives peuvent servir de référence ponctuelle, mais ne sont pas réimportées automatiquement.
 
-## ADR-006 — Cible du 7 octobre 2026
-- **Date :** 2026-09-30
+## ADR-006 — Cible du 5 octobre : démonstration, pas mise en production
+- **Date :** 2026-10-02
 - **Statut :** accepté
-- **Contexte :** le projet doit être présenté le 7 octobre 2026.
-- **Décision :** viser une Release Candidate de démonstration fonctionnelle et techniquement vendable, sans prétendre à une mise en exploitation complète.
-- **Pourquoi :** concentrer le temps disponible sur la stabilité, la crédibilité technique, la sécurité de base, l'explicabilité et la démonstration.
-- **Conséquences :** aucune fonctionnalité majeure hors périmètre ne doit mettre en danger la RC. Le passage d'une étape journalière à la suivante est signalé explicitement avant de poursuivre.
+- **Contexte :** JusteCap et D&D CV doivent être présentés depuis un navigateur sur une machine tierce.
+- **Décision :** publier deux sites de démonstration distincts. La version JusteCap montre le fonctionnement sans être présentée comme exploitable professionnellement.
+- **Pourquoi :** privilégier une démonstration stable, honnête et accessible plutôt qu'une fausse promesse de production.
+- **Conséquences :** les mécanismes de simulation sont autorisés s'ils sont identifiés comme tels et n'utilisent que des données fictives.
 
+## ADR-007 — Identité de démonstration
+- **Date :** 2026-10-02
+- **Statut :** accepté
+- **Décision :** afficher **JusteCap** comme nom principal et conserver **Orientation Pro** comme référence de transition.
+
+## ADR-008 — Sémantique du score
+- **Date :** 2026-10-02
+- **Statut :** accepté
+- **Décision :** les pourcentages sont des **indices internes de compatibilité**.
+- **Conséquences :** ils ne doivent pas être présentés comme une probabilité d'embauche, de réussite professionnelle ou une aptitude médicale.
+
+## ADR-009 — Marché de l'emploi et données officielles
+- **Date :** 2026-10-02
+- **Statut :** accepté
+- **Décision :** distinguer explicitement les données BMO officielles des indicateurs calculés par JusteCap.
+- **Conséquences :** aucun calcul interne ou facteur de démonstration ne peut être affiché comme une statistique France Travail.
+
+## ADR-010 — Points de vigilance
+- **Date :** 2026-10-02
+- **Statut :** accepté
+- **Décision :** le libellé utilisateur « Défauts » devient « Points de vigilance ».
+- **Conséquences :** les anciens identifiants internes peuvent être conservés temporairement pour limiter les régressions avant la démonstration.
+
+## ADR-011 — Deux démonstrations indépendantes
+- **Date :** 2026-10-02
+- **Statut :** accepté
+- **Décision :** JusteCap et D&D CV sont déployés séparément. JusteCap fournit seulement un lien vers D&D CV.
+- **Pourquoi :** une panne ou une évolution d'un démonstrateur ne doit pas rendre l'autre indisponible.
