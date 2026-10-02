@@ -474,10 +474,10 @@ function sendResultsToAdvisor(){
   if(!profile.firstName||!profile.lastName){box.innerHTML='<div class="notice">Renseignez au minimum un prénom et un nom avant d\'envoyer les résultats.</div>';return}
   const inst=institutions.find(i=>i.id===profile.institutionId),adv=inst?.advisors.find(a=>a.id===profile.advisorId);
   if(!adv){box.innerHTML='<div class="notice">Aucun conseiller n\'est sélectionné. Revenez au profil pour choisir votre établissement et votre conseiller, ou utilisez « Télécharger mes résultats » pour les conserver.</div>';return}
-  if(lastSentDossierRef){box.innerHTML=`<div class="success">Les résultats ont déjà été envoyés à <strong>${esc(adv.firstName)} ${esc(adv.lastName)}</strong>. Référence : <span class="codebox">${esc(lastSentDossierRef)}</span></div>`;return}
+  if(lastSentDossierRef){box.innerHTML=`<div class="success">Ce dossier est déjà présent dans l’espace conseiller de démonstration. Référence : <span class="codebox">${esc(lastSentDossierRef)}</span></div>`;return}
   const d=buildDossierFromCurrentProfile();
   const arr=getDossiers();arr.unshift(d);setDossiers(arr);lastSentDossierRef=d.ref;
-  box.innerHTML=`<div class="success">Résultats envoyés à <strong>${esc(adv.firstName)} ${esc(adv.lastName)}</strong>, ${esc(inst.name)}.<br><br>Référence : <span class="codebox">${esc(d.ref)}</span></div>`;window.scrollTo({top:0,behavior:"smooth"});
+  box.innerHTML=`<div class="success"><strong>Dossier ajouté à l’espace conseiller de démonstration.</strong><br>Il est maintenant visible pour <strong>${esc(adv.firstName)} ${esc(adv.lastName)}</strong>, ${esc(inst.name)}.<br><span class="hint">Dans une version connectée, cette action transmettrait le dossier au compte du conseiller sélectionné.</span><br><br>Référence : <span class="codebox">${esc(d.ref)}</span></div>`;window.scrollTo({top:0,behavior:"smooth"});
 }
 function proposeSkillDiscovery(){
   const ok=confirm("Ouvrir le module « Connaître MES compétences » ?\n\nVotre progression actuelle dans le questionnaire sera conservée. Ce module est complémentaire et peut être utilisé indépendamment.");
