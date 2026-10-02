@@ -100,3 +100,14 @@ Ce fichier garde la trace du **pourquoi** des choix importants afin d'éviter qu
 - **Décision :** afficher explicitement les références ROME/France Travail lorsqu'un rattachement est fiable, et identifier comme « démo » toute estimation interne encore utilisée (durée de formation, salaire de référence, indice local calculé).
 - **Pourquoi :** éviter qu'une valeur construite pour montrer le fonctionnement soit interprétée comme une donnée officielle.
 - **Conséquences :** les notes artificielles d'évolution /10 et les affirmations génériques d'alternance sont retirées de l'interface. Un intitulé trop générique reste sans code ROME plutôt que d'être rattaché arbitrairement.
+
+
+## ADR-013 — Couche UX de compétences
+- **Date :** 2026-10-02
+- **Statut :** accepté
+- **Contexte :** le référentiel ROME contient plus de 21 000 savoir-faire. Les afficher directement rendrait le parcours inutilisable.
+- **Décision :** JusteCap utilise une couche UX compacte de 15 catégories, 167 macro-compétences sélectionnables et 668 précisions recherchables.
+- **Fonctionnement :** l'utilisateur recherche ou sélectionne une macro-compétence ; le moteur distingue correspondance exacte, proximité dans une même famille fonctionnelle et proximité dans une même catégorie.
+- **Pourquoi :** conserver la richesse du raisonnement par compétences sans exposer une liste de plusieurs dizaines de milliers d'éléments.
+- **Source :** la structure s'inspire du référentiel ROME, mais la taxonomie UX JusteCap n'est pas une reproduction exhaustive ni officielle de l'arborescence France Travail.
+- **Conséquences :** toute présentation doit distinguer clairement le volume du référentiel ROME et la couche simplifiée utilisée dans l'interface.
