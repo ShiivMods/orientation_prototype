@@ -327,3 +327,37 @@ jobs.push({
   evolution:["Conducteur grand tourisme","Formateur conduite","Responsable d'exploitation"],
   functional:{professionalDrivingRegulated:true,drivingRequired:true,prolongedStanding:false,walking:false,lifting:false,fineMotor:false,screen:false,visualDetail:true,phone:false,oral:true,noise:true,publicContact:true,frequentTravel:true,night:false,sustainedPace:false}
 });
+
+const jobSourceMetadata = {
+  1:{rome:"K1801",officialTitle:"Conseiller / Conseillère en insertion professionnelle"},
+  2:{rome:"I1401",officialTitle:"Technicien / Technicienne de maintenance en informatique"},
+  3:{rome:"N1103",officialTitle:"Préparateur / Préparatrice de commandes"},
+  4:{rome:null,officialTitle:null,note:"Intitulé générique : rattachement ROME à préciser"},
+  5:{rome:null,officialTitle:null,note:"Intitulé générique : rattachement ROME à préciser"},
+  6:{rome:"I1304",officialTitle:"Technicien / Technicienne de maintenance industrielle"},
+  7:{rome:"N4105",officialTitle:"Conducteur-livreur / Conductrice-livreuse"},
+  8:{rome:"G1202",officialTitle:"Animation d'activités culturelles ou ludiques",note:"Le titre professionnel de médiateur numérique est rattaché à ce ROME dans les formations France Travail consultées."},
+  9:{rome:null,officialTitle:null,note:"Intitulé générique : rattachement ROME à préciser selon le secteur de production"},
+  10:{rome:"M1501",officialTitle:"Assistant / Assistante Ressources Humaines (RH)"},
+  11:{rome:"A1203",officialTitle:"Agent / Agente d'entretien des espaces verts",officialAccess:"Accessible sans qualification. Des formations de niveau CAP à Bac en aménagement paysager peuvent faciliter l'accès ; CACES ou permis peuvent être demandés selon le poste."},
+  12:{rome:"D1408",officialTitle:"Conseiller / Conseillère clientèle à distance",officialAccess:"Accessible avec un diplôme de niveau Bac à Bac +2 dans le commerce ou la vente."},
+  13:{rome:"M1805",officialTitle:"Développeur / Développeuse informatique",officialAccess:"Accessible avec un niveau Bac +2 à Bac +5 en informatique, ou via le TP Développeur web et web mobile complété par une expérience adaptée."},
+  14:{rome:"E1205",officialTitle:"Designer graphique"},
+  15:{rome:"K1302",officialTitle:"Aide à domicile"},
+  16:{rome:"K2503",officialTitle:"Agent / Agente de prévention et de sécurité"},
+  17:{rome:"G1602",officialTitle:"Commis / Commise de cuisine"},
+  18:{rome:"G1202",officialTitle:"Animateur / Animatrice d'atelier artistique ou ludique"},
+  19:{rome:"M1203",officialTitle:"Comptable",note:"Le métier de démonstration « Assistant comptable » est rattaché à la famille ROME Comptable."},
+  20:{rome:"I1604",officialTitle:"Mécanicien / Mécanicienne automobile"},
+  21:{rome:"N4103",officialTitle:"Conducteur / Conductrice de transport en commun sur route"}
+};
+
+jobs.forEach(job=>{
+  const meta=jobSourceMetadata[job.id]||{};
+  job.rome=meta.rome||null;
+  job.officialTitle=meta.officialTitle||null;
+  job.sourceNote=meta.note||null;
+  job.officialAccess=meta.officialAccess||null;
+  job.romeUrl=job.rome?`https://candidat.francetravail.fr/metierscope/fiche-metier/${job.rome}/m`:null;
+});
+
