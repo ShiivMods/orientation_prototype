@@ -5,24 +5,25 @@
  */
 
 function preferenceScore(job){
-  let total=0, max=0, conflicts=0, activeCount=0;
-  const userMap={want:1,neutral:0,avoid:-1,impossible:-2};
+  let total=0,conflicts=0,activeCount=0;
+  const hardConflicts=[];
   Object.keys(job.prefs).forEach(k=>{
-    const u=userMap[profile.prefs[k]||"neutral"];
+    const u=profile.prefs[k]||"neutral";
     const j=job.prefs[k];
-    if(u===0)return;
+    if(u==="neutral") return;
     activeCount++;
-    max+=2;
-    if(u===1){
-      total += j===1?2:j===0?1:0;
-    } else if(u===-1){
-      total += j===-1?2:j===0?1:0;
-    } else if(u===-2){
+
+    if(u==="want"){
+      total += j===1?100:j===0?55:10;
+    }else if(u==="avoid"){
+      total += j===-1?100:j===0?65:5;
       if(j===1) conflicts++;
-      total += j===-1?2:j===0?1:0;
+    }else if(u==="impossible"){
+      total += j===-1?100:j===0?45:0;
+      if(j===1){conflicts++;hardConflicts.push(k)}
     }
   });
-  return {score:max?Math.round((total/max)*100):null, conflicts, activeCount};
+  return {score:activeCount?Math.round(total/activeCount):null,conflicts,hardConflicts,activeCount};
 }
 
 function interestBonus(job){
@@ -170,76 +171,149 @@ function macroSkillCoverage(job,selectedMacroIds){
   return Math.round(Math.pow(total/required.length,1.08)*100);
 }
 
+function buildSpecificityIndex(key){
+  const counts=new Map();
+  jobs.forEach(job=>[...new Set(job[key]||[])].forEach(item=>counts.set(item,(counts.get(item)||0)+1)));
+  const n=Math.max(1,jobs.length),weights=new Map();
+  counts.forEach((freq,item)=>weights.set(item,1+Math.log((n+1)/(freq+1))));
+  return weights;
+}
+const softSpecificity=buildSpecificityIndex("soft");
+
+function weightedCoverage(required,selected,specificity){
+  if(!selected?.length) return null;
+  if(!required?.length) return 50;
+  const selectedSet=new Set(selected);
+  let totalWeight=0,matchedWeight=0;
+  required.forEach(item=>{
+    const w=specificity.get(item)||1;
+    totalWeight+=w;
+    if(selectedSet.has(item)) matchedWeight+=w;
+  });
+  if(!totalWeight) return 0;
+  return Math.round(Math.pow(matchedWeight/totalWeight,1.12)*100);
+}
+
+function qualityCompatibility(job){
+  const selected=profile.qualitiesSelected||[];
+  if(!selected.length) return null;
+  let matched=0;
+  selected.forEach(q=>{
+    const mapped=qualityToSoft[q]||[];
+    if(mapped.some(x=>job.soft.includes(x))) matched++;
+  });
+  return Math.round((matched/selected.length)*100);
+}
+
+function profileEvidenceConfidence(pref){
+  const skillUnits=(profile.skillMacros||[]).length;
+  const softUnits=(profile.soft||[]).length;
+  const qualityUnits=(profile.qualitiesSelected||[]).length*.8;
+  const prefUnits=(pref?.activeCount||0)*.7;
+  const experienceUnits=(profile.experienceSelected||[]).length*.35;
+  const total=Math.min(14,skillUnits+softUnits+qualityUnits+prefUnits+experienceUnits);
+  return Math.round(45+(total/14)*55);
+}
+
+function accessPenalty(job){
+  let penalty=0;
+  const reasons=[];
+  const educationGap=Math.max(0,job.education-(profile.education||0));
+  if(educationGap){
+    const p=Math.min(15,educationGap*5);
+    penalty+=p;
+    reasons.push(`Niveau d'accès supérieur au niveau déclaré (-${p})`);
+  }
+  const trainingGap=Math.max(0,job.training-(profile.maxTraining||0));
+  if(trainingGap){
+    const p=Math.min(28,8+Math.round(trainingGap*.9));
+    penalty+=p;
+    reasons.push(`Formation estimée plus longue que la durée acceptée (-${p})`);
+  }
+  const salaryGap=Math.max(0,(profile.salary||0)-job.salary);
+  if(salaryGap){
+    const p=Math.min(18,Math.max(3,Math.round(salaryGap/100)*2));
+    penalty+=p;
+    reasons.push(`Salaire de référence démo inférieur au minimum souhaité (-${p})`);
+  }
+  return {penalty:Math.min(45,penalty),reasons};
+}
+
 function scoreJob(job){
   const selectedMacros=profile.skillMacros||[];
   const selectedSoft=profile.soft||[];
-  const selectedQualities=profile.qualitiesSelected||[];
   const requiredMacros=jobMacroRequirements(job);
   const selectedMacroSet=new Set(selectedMacros);
 
   const matchedSkills=requiredMacros
-    .filter(id=>selectedMacroSet.has(id) || selectedMacros.some(sel=>skillById.get(sel)?.base===skillById.get(id)?.base))
+    .filter(id=>selectedMacroSet.has(id)||selectedMacros.some(sel=>skillById.get(sel)?.base===skillById.get(id)?.base))
     .map(id=>skillById.get(id)?.label)
     .filter(Boolean);
-  const matchedSoft=job.soft.filter(s=>selectedSoft.includes(s));
+  const matchedSoft=job.soft.filter(x=>selectedSoft.includes(x));
 
   const skillScore=macroSkillCoverage(job,selectedMacros);
-  const softScore=selectedSoft.length && job.soft.length ? matchedSoft.length/job.soft.length*100 : null;
-  const qualityMatches=selectedQualities.filter(q=>(qualityToSoft[q]||[]).some(s=>job.soft.includes(s)));
-  const qualityScore=selectedQualities.length ? qualityMatches.length/selectedQualities.length*100 : null;
+  const softScore=weightedCoverage(job.soft,selectedSoft,softSpecificity);
+  const qualityScore=qualityCompatibility(job);
   const pref=preferenceScore(job);
 
   const dimensions=[];
-  if(skillScore!==null) dimensions.push(["Savoir-faire",skillScore,50]);
-  if(softScore!==null) dimensions.push(["Savoir-être",softScore,25]);
-  if(qualityScore!==null) dimensions.push(["Qualités",qualityScore,15]);
-  if(pref.score!==null) dimensions.push(["Préférences",pref.score,25]);
+  if(skillScore!==null) dimensions.push({name:"Savoir-faire",score:skillScore,weight:50});
+  if(softScore!==null) dimensions.push({name:"Savoir-être",score:softScore,weight:25});
+  if(qualityScore!==null) dimensions.push({name:"Qualités",score:qualityScore,weight:15});
+  if(pref.score!==null) dimensions.push({name:"Préférences",score:pref.score,weight:25});
 
-  const totalWeight=dimensions.reduce((sum,[,,weight])=>sum+weight,0);
-  let base=totalWeight
-    ? dimensions.reduce((sum,[,score,weight])=>sum+score*weight,0)/totalWeight
-    : 0;
+  let weighted=0,totalWeight=0;
+  dimensions.forEach(d=>{weighted+=d.score*d.weight;totalWeight+=d.weight});
+  let base=totalWeight?weighted/totalWeight:0;
 
-  const accessReasons=[];
-  let accessPenalty=0;
-  const educationGap=Math.max(0,job.education-(profile.education||0));
-  if(educationGap){
-    const p=Math.min(18,educationGap*6);
-    accessPenalty+=p;
-    accessReasons.push(`Niveau d'accès supérieur au niveau déclaré (-${p})`);
+  const confidence=profileEvidenceConfidence(pref);
+  if(totalWeight){
+    const confidenceCap=30+confidence*.70;
+    base=Math.min(base,confidenceCap);
   }
-  const trainingGap=Math.max(0,job.training-(profile.maxTraining||0));
-  if(trainingGap){
-    const p=Math.min(24,8+Math.round(trainingGap));
-    accessPenalty+=p;
-    accessReasons.push(`Formation estimée plus longue que la durée acceptée (-${p})`);
-  }
-  const salaryGap=Math.max(0,(profile.salary||0)-job.salary);
-  if(salaryGap){
-    const p=Math.min(16,Math.max(2,Math.ceil(salaryGap/100)*2));
-    accessPenalty+=p;
-    accessReasons.push(`Salaire de référence démo inférieur au minimum souhaité (-${p})`);
-  }
-
-  base-=Math.min(40,accessPenalty);
-  base-=pref.conflicts*12;
-  base=Math.max(0,Math.min(99,Math.round(base)));
 
   const interest=interestBonus(job);
   const experience=experienceBonus(job);
   const traits=traitAdjustment(job);
+  const access=accessPenalty(job);
   const accessibility=accessibilityAssessment(job);
-  const total=accessibility.blocked?0:Math.max(0,Math.min(96,base+interest.bonus+experience.bonus+traits.qualityBonus-traits.defectPenalty-accessibility.penalty));
 
-  const breakdown=Object.fromEntries(dimensions.map(([name,score])=>[name,Math.round(score)]));
-  return {total,base,interestBonus:interest.bonus,interestMatches:interest.matches,
+  const impossiblePenalty=Math.min(45,pref.hardConflicts.length*35);
+  const ordinaryPreferencePenalty=Math.min(15,Math.max(0,pref.conflicts-pref.hardConflicts.length)*7);
+
+  let total=base
+    +interest.bonus
+    +experience.bonus
+    +traits.qualityBonus
+    -traits.defectPenalty
+    -access.penalty
+    -accessibility.penalty
+    -impossiblePenalty
+    -ordinaryPreferencePenalty;
+
+  if(accessibility.blocked) total=0;
+  total=Math.max(0,Math.min(96,Math.round(total)));
+
+  const breakdown={
+    "Savoir-faire":skillScore===null?"Non renseigné":skillScore,
+    "Savoir-être":softScore===null?"Non renseigné":softScore,
+    "Qualités":qualityScore===null?"Non renseigné":qualityScore,
+    "Préférences":pref.score===null?"Non renseigné":pref.score,
+    "Confiance du profil":confidence
+  };
+
+  return {
+    total,base:Math.round(base),confidence,
+    interestBonus:interest.bonus,interestMatches:interest.matches,
     experienceBonus:experience.bonus,experienceMatches:experience.matches,
     qualityBonus:traits.qualityBonus,qualityMatches:traits.qualityMatches,
     defectPenalty:traits.defectPenalty,defectMatches:traits.defectMatches,
     accessibilityPenalty:accessibility.penalty,accessibility,
-    accessPenalty:Math.min(40,accessPenalty),accessReasons,
+    accessPenalty:access.penalty,accessReasons:access.reasons,
+    impossiblePenalty,ordinaryPreferencePenalty,
     requiredMacros,matchedSkills,matchedSoft,breakdown,
-    conflicts:pref.conflicts};
+    conflicts:pref.conflicts,hardPreferenceConflicts:pref.hardConflicts
+  };
 }
 
 function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
