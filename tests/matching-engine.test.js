@@ -7,11 +7,12 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 const catalog = fs.readFileSync(path.join(root, 'assets/js/catalog.js'), 'utf8');
 const taxonomy = fs.readFileSync(path.join(root, 'assets/js/skills-taxonomy.js'), 'utf8');
+const largeJobs = fs.readFileSync(path.join(root, 'assets/js/jobs-large.js'), 'utf8');
 const engine = fs.readFileSync(path.join(root, 'assets/js/matching-engine.js'), 'utf8');
 
 function makeContext(profile) {
   const context = vm.createContext({ profile });
-  vm.runInContext(catalog + '\n' + taxonomy + '\n' + engine, context, { filename: 'justecap-engine.js' });
+  vm.runInContext(catalog + '\n' + taxonomy + '\n' + largeJobs + '\n' + engine, context, { filename: 'justecap-engine.js' });
   return context;
 }
 
@@ -170,4 +171,29 @@ test('every current demo job has an explicit macro-skill mapping', () => {
   const ctx = makeContext(baseProfile());
   const missing = expr(ctx, 'jobs.filter(j=>!Array.isArray(j.skillMacroIds)||!j.skillMacroIds.length).map(j=>j.title)');
   assert.deepEqual(Array.from(missing), []);
+});
+
+
+test('large demo catalog restores 301 unique jobs', () => {
+  const ctx = makeContext(baseProfile());
+  const stats = expr(ctx, 'LARGE_DEMO_CATALOG_STATS');
+  const titles = expr(ctx, 'jobs.map(j=>j.title.toLocaleLowerCase("fr"))');
+  assert.equal(stats.enriched, 21);
+  assert.equal(stats.secondary, 280);
+  assert.equal(stats.total, 301);
+  assert.equal(new Set(Array.from(titles)).size, 301);
+});
+
+test('all large-catalog skill mappings reference valid taxonomy entries', () => {
+  const ctx = makeContext(baseProfile());
+  const invalid = expr(ctx, 'jobs.flatMap(j=>(j.skillMacroIds||[]).filter(id=>!skillById.has(id)).map(id=>({title:j.title,id})))');
+  assert.deepEqual(Array.from(invalid), []);
+});
+
+test('large catalog includes diverse searchable professions', () => {
+  const ctx = makeContext(baseProfile());
+  const titles = expr(ctx, 'jobs.map(j=>j.title)');
+  for (const expected of ['Plombier','Data analyst','Infirmier','Boulanger','Agent immobilier','Éducateur spécialisé']) {
+    assert.ok(titles.includes(expected), expected + ' missing from catalog');
+  }
 });
