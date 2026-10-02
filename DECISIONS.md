@@ -111,3 +111,14 @@ Ce fichier garde la trace du **pourquoi** des choix importants afin d'éviter qu
 - **Pourquoi :** conserver la richesse du raisonnement par compétences sans exposer une liste de plusieurs dizaines de milliers d'éléments.
 - **Source :** la structure s'inspire du référentiel ROME, mais la taxonomie UX JusteCap n'est pas une reproduction exhaustive ni officielle de l'arborescence France Travail.
 - **Conséquences :** toute présentation doit distinguer clairement le volume du référentiel ROME et la couche simplifiée utilisée dans l'interface.
+
+
+## ADR-014 — Restaurer la largeur fonctionnelle de la V0.16
+- **Date :** 2026-10-02
+- **Statut :** accepté
+- **Contexte :** la baseline Git V0.9 avait perdu plusieurs fonctions présentes dans une version de travail V0.16.
+- **Décision :** restaurer pour la démonstration les fonctions utiles de la V0.16 : taxonomie détaillée, recherche de compétences, catalogue large, recherche métier, précision du profil, compteur de résultats, métiers déjà pratiqués, persistance, retour vers les aptitudes et impression des dossiers.
+- **Catalogue :** 21 métiers restent des fiches enrichies ; 280 métiers secondaires restaurent la largeur d'exploration, soit 301 métiers au total.
+- **Transparence :** les 280 fiches secondaires sont identifiées comme contenu de démonstration et ne sont pas présentées comme des fiches ROME exhaustives.
+- **Exceptions volontaires :** ne pas restaurer les mécanismes précédemment identifiés comme trompeurs ou insuffisamment sourcés, notamment le facteur local pseudo-aléatoire et la propension BMO non vérifiée.
+- **Pourquoi :** retrouver la démonstration produit avancée sans réintroduire ses défauts connus.
