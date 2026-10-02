@@ -21,6 +21,7 @@ jobs:
         run: |
           node --check assets/js/catalog.js
           node --check assets/js/skills-taxonomy.js
+          node --check assets/js/jobs-large.js
           node --check assets/js/matching-engine.js
           node --check assets/js/app.js
 
@@ -32,8 +33,14 @@ jobs:
           grep -q 'assets/css/app.css' index.html
           grep -q 'assets/js/catalog.js' index.html
           grep -q 'assets/js/skills-taxonomy.js' index.html
+          grep -q 'assets/js/jobs-large.js' index.html
           grep -q 'assets/js/matching-engine.js' index.html
           grep -q 'assets/js/app.js' index.html
+          grep -q 'id="jobSearch"' index.html
+          grep -q 'id="hidePastJobs"' index.html
+          grep -q 'id="profileReliability"' index.html
+          grep -q 'id="resultCount"' index.html
+          grep -q 'id="pastJobSearch"' index.html
           if grep -q 'function advisorLogin' index.html; then
             echo "Application JavaScript must not be duplicated inline in index.html."
             exit 1
