@@ -18,11 +18,20 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Check JavaScript syntax
-        run: node --check app.js
-
-      - name: Verify application script is externalized
         run: |
-          grep -q '<script src="app.js" defer></script>' index.html
+          node --check assets/js/catalog.js
+          node --check assets/js/matching-engine.js
+          node --check assets/js/app.js
+
+      - name: Run matching engine tests
+        run: node --test tests/matching-engine.test.js
+
+      - name: Verify static application structure
+        run: |
+          grep -q 'assets/css/app.css' index.html
+          grep -q 'assets/js/catalog.js' index.html
+          grep -q 'assets/js/matching-engine.js' index.html
+          grep -q 'assets/js/app.js' index.html
           if grep -q 'function advisorLogin' index.html; then
             echo "Application JavaScript must not be duplicated inline in index.html."
             exit 1
@@ -34,3 +43,4 @@ jobs:
           test -f SECURITY.md
           test -f DECISIONS.md
           test -f docs/PRODUCTION_READINESS.md
+          test -f docs/PREFLIGHT_AUDIT.md
