@@ -134,3 +134,10 @@ La CI GitHub valide :
 - présence de la documentation requise.
 
 Le test visuel et le parcours complet dans un navigateur public sont volontairement rattachés au **Jour 1 — présentabilité de JusteCap**, après déploiement ou mise à disposition d'une URL de prévisualisation.
+
+
+## Question terrain à poser à un conseiller
+
+- **Diplôme : faut-il distinguer « Non renseigné » et « Sans diplôme » dans le traitement ?**
+  - Hypothèse actuelle pour la démonstration : les deux sont traités de la même manière par le moteur, faute d'information prouvant un niveau supérieur.
+  - Point à valider avec un professionnel : cette distinction apporte-t-elle une valeur dans l'accompagnement ou le calcul, au-delà de la différence sémantique ?
