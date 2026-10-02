@@ -414,15 +414,26 @@ function updateAdvisorOptions(){
   sel.innerHTML='<option value="">Aucun / je ne sais pas</option>';
   if(inst) sel.innerHTML += inst.advisors.map(a=>`<option value="${a.id}">${a.firstName} ${a.lastName}</option>`).join("");
 }
-function getDossiers(){try{return JSON.parse(localStorage.getItem("orientationProDossiers")||"[]")}catch(e){return[]}}
-function setDossiers(x){localStorage.setItem("orientationProDossiers",JSON.stringify(x))}
+const DEMO_STATE_VERSION="2026-10-02-r1";
+const DEMO_DOSSIERS=[
+  {ref:"ORI-7F3K-2PA",date:"2026-10-01T09:20:00",firstName:"Camille",lastName:"Numérique",age:31,education:2,disabilitiesSelected:[],functionalLimits:[],regionId:"normandie",departmentCode:"14",employmentAreaId:"caen",employmentArea:"Caen",institutionId:"enefa-herouville",advisorId:"demo-advisor",skills:["Utiliser des outils numériques","Résoudre des problèmes","Organiser son travail"],soft:["Curiosité","Patience","Autonomie"],hobbiesSelected:["video_games","computing","strategy_games"],results:[{title:"Technicien support informatique",score:78},{title:"Médiateur numérique",score:72}]},
+  {ref:"ORI-Q9D4-8LM",date:"2026-09-30T14:10:00",firstName:"Sophie",lastName:"Accompagnement",age:42,education:2,disabilitiesSelected:[],functionalLimits:[],regionId:"normandie",departmentCode:"14",employmentAreaId:"caen",employmentArea:"Caen",institutionId:"enefa-herouville",advisorId:"demo-advisor",skills:["Accueillir du public","Conseiller une personne","Rédiger des documents"],soft:["Écoute","Diplomatie","Organisation"],hobbiesSelected:["reading","social","writing"],results:[{title:"Conseiller en insertion professionnelle",score:76},{title:"Assistant ressources humaines",score:69}]},
+  {ref:"ORI-L2X8-1BC",date:"2026-09-29T10:40:00",firstName:"Julien",lastName:"Technique",age:27,education:1,disabilitiesSelected:[],functionalLimits:[],regionId:"normandie",departmentCode:"14",employmentAreaId:"caen",employmentArea:"Caen",institutionId:"enefa-herouville",advisorId:"demo-advisor",skills:["Réparer / entretenir","Travailler manuellement","Résoudre des problèmes"],soft:["Autonomie","Rigueur","Curiosité"],hobbiesSelected:["mechanics","diy","science"],results:[{title:"Mécanicien automobile",score:82},{title:"Agent de maintenance",score:75}]}
+];
+function getDossiers(){try{return JSON.parse(localStorage.getItem("justecapDemoDossiers")||"[]")}catch(e){return[]}}
+function setDossiers(x){localStorage.setItem("justecapDemoDossiers",JSON.stringify(x))}
 function seedDemoDossiers(){
-  if(localStorage.getItem("orientationProSeeded")) return;
-  setDossiers([
-    {ref:"ORI-7F3K-2PA",date:"2026-09-11T09:20:00",firstName:"Camille",lastName:"Martin",age:31,education:2,disabilitiesSelected:[],functionalLimits:[],regionId:"normandie",departmentCode:"14",employmentAreaId:"caen",employmentArea:"Caen",institutionId:"enefa-caen",advisorId:"demo-advisor",skills:["Utiliser des outils numériques","Résoudre des problèmes","Organiser son travail"],soft:["Curiosité","Patience","Autonomie"],hobbiesSelected:["video_games","computing","strategy_games"],weaknesses:"",results:[{title:"Technicien support informatique",score:91},{title:"Médiateur numérique",score:86}]},
-    {ref:"ORI-Q9D4-8LM",date:"2026-09-09T14:10:00",firstName:"Sophie",lastName:"Leclerc",age:42,education:2,disabilitiesSelected:[],functionalLimits:[],regionId:"normandie",departmentCode:"14",employmentAreaId:"caen",employmentArea:"Caen",institutionId:"enefa-caen",advisorId:"demo-advisor",skills:["Accueillir du public","Conseiller une personne","Rédiger des documents"],soft:["Écoute","Diplomatie","Organisation"],hobbiesSelected:["reading","social","writing"],weaknesses:"",results:[{title:"Conseiller en insertion professionnelle",score:89},{title:"Assistant ressources humaines",score:84}]},
-    {ref:"ORI-L2X8-1BC",date:"2026-09-03T10:40:00",firstName:"Julien",lastName:"Morel",age:27,education:1,disabilitiesSelected:[],functionalLimits:[],regionId:"normandie",departmentCode:"14",employmentAreaId:"caen",employmentArea:"Caen",institutionId:"enefa-caen",advisorId:"demo-advisor",skills:["Réparer / entretenir","Travailler manuellement","Résoudre des problèmes"],soft:["Autonomie","Rigueur","Curiosité"],hobbiesSelected:["mechanics","diy","science"],weaknesses:"",results:[{title:"Mécanicien automobile",score:93},{title:"Agent de maintenance",score:88}]}
-  ]); localStorage.setItem("orientationProSeeded","1");
+  if(localStorage.getItem("justecapDemoStateVersion")===DEMO_STATE_VERSION && getDossiers().length) return;
+  setDossiers(DEMO_DOSSIERS);
+  localStorage.setItem("justecapDemoStateVersion",DEMO_STATE_VERSION);
+}
+function resetDemoState(){
+  if(!confirm("Réinitialiser la démonstration et restaurer les dossiers fictifs d’origine ?")) return;
+  localStorage.removeItem("justecapDemoDossiers");
+  localStorage.removeItem("justecapDemoStateVersion");
+  localStorage.removeItem("orientationProDossiers");
+  localStorage.removeItem("orientationProSeeded");
+  location.reload();
 }
 function makeRef(){const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",p=n=>Array.from({length:n},()=>c[Math.floor(Math.random()*c.length)]).join("");return `ORI-${p(4)}-${p(3)}`}
 function buildDossierFromCurrentProfile(){
