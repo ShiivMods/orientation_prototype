@@ -177,7 +177,7 @@ function scoreJob(job){
   const experience=experienceBonus(job);
   const traits=traitAdjustment(job);
   const accessibility=accessibilityAssessment(job);
-  const total=accessibility.blocked?0:Math.max(0,Math.min(100,base+interest.bonus+experience.bonus+traits.qualityBonus-traits.defectPenalty-accessibility.penalty));
+  const total=accessibility.blocked?0:Math.max(0,Math.min(96,base+interest.bonus+experience.bonus+traits.qualityBonus-traits.defectPenalty-accessibility.penalty));
 
   const breakdown=Object.fromEntries(dimensions.map(([name,score])=>[name,Math.round(score)]));
   return {total,base,interestBonus:interest.bonus,interestMatches:interest.matches,
