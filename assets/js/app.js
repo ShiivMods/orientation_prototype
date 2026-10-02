@@ -308,16 +308,19 @@ function renderJobs(){
           <div>
             <div class="job-domain">${j.domain}</div>
             <div class="job-title">${j.title}</div>
-            <div class="hint">${j.access}</div>
+            <div class="hint">${j.officialAccess
+              ? `<strong>Accès • France Travail :</strong> ${esc(j.officialAccess)}`
+              : `<strong>Accès • synthèse de démonstration :</strong> ${esc(j.access)}`}</div>
           </div>
           <div class="score">${j.match.total}%</div>
         </div>
         <div class="job-meta">
           ${j.market.selectedCount>1?recruitmentTooltipHtml(j.market):`<span class="pill good">Indice local de démonstration : ${demandLabel} (${j.market.index}/100) • ${j.market.basin.name}</span>`}
-          <span class="pill">${j.apprenticeship?"Alternance possible":"Alternance non renseignée"}</span>
-          <span class="pill">Formation : ${trainingLabel}</span>
-          <span class="pill">Évolution : ${j.evol}/10</span>
-          <span class="pill">Salaire indicatif : ${j.salary} €</span>
+          ${j.rome
+            ? `<a class="pill source-pill" href="${esc(j.romeUrl)}" target="_blank" rel="noopener noreferrer">ROME ${esc(j.rome)} • France Travail ↗</a>`
+            : `<span class="pill warn">Rattachement ROME à préciser</span>`}
+          <span class="pill">Formation estimée (démo) : ${trainingLabel}</span>
+          <span class="pill">Salaire de référence (démo) : ${j.salary} €</span>
           ${j.match.accessibility.status==="blocked"?`<span class="compat-badge compat-block">Écarté : limitation déclarée</span>`:
              j.match.accessibility.status==="check"?`<span class="compat-badge compat-check">Aptitude réglementée à vérifier</span>`:
              j.match.accessibility.status==="adjust"?`<span class="compat-badge compat-adjust">Aménagement à vérifier</span>`:
@@ -338,7 +341,7 @@ function renderJobs(){
               <strong>Détail de compatibilité</strong>
               <ul class="small-list">
                 ${Object.entries(j.match.breakdown).map(([k,v])=>`<li>${k} : <strong>${v}%</strong></li>`).join("")}
-                <li>Score principal : <strong>${j.match.base}%</strong></li>
+                <li>Indice principal : <strong>${j.match.base}%</strong></li>
                 <li>Bonus loisirs : <strong>+${j.match.interestBonus}</strong></li>
                 <li>Bonus expérience de travail : <strong>+${j.match.experienceBonus}</strong></li>
                 <li>Bonus qualités : <strong>+${j.match.qualityBonus}</strong></li>
@@ -383,8 +386,12 @@ function renderJobs(){
               <div class="market-source">Données territoriales : BMO 2026 France Travail. L'indice /100 affiché au-dessus est un calcul interne de démonstration de JusteCap, pas une statistique France Travail. Une version professionnelle devra utiliser une source métier × territoire documentée.</div>
             </div>
             <div class="summary-card">
-              <strong>Évolutions possibles</strong>
-              <ul class="small-list">${j.evolution.map(x=>`<li>${x}</li>`).join("")}</ul>
+              <strong>Référentiel métier</strong>
+              ${j.rome
+                ? `<p class="hint"><strong>ROME ${esc(j.rome)}</strong><br>${esc(j.officialTitle||j.title)}</p>
+                   <a class="source-link" href="${esc(j.romeUrl)}" target="_blank" rel="noopener noreferrer">Consulter la fiche France Travail ↗</a>
+                   ${j.sourceNote?`<p class="hint" style="margin-top:8px">${esc(j.sourceNote)}</p>`:""}`
+                : `<p class="hint">${esc(j.sourceNote||"Le rattachement ROME de cet intitulé de démonstration doit encore être précisé.")}</p>`}
             </div>
             <div class="summary-card">
               <strong>Affinité loisirs</strong>
