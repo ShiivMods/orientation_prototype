@@ -171,7 +171,7 @@ function validateCurrentStep(){
     ).length;
     if(aptitudeCount<1){
       const box=document.getElementById("aptitudeValidation");
-      box.textContent="Sélectionnez au moins une aptitude, parmi les savoir-faire, savoir-être, qualités ou défauts, avant de continuer.";
+      box.textContent="Sélectionnez au moins une aptitude, parmi les savoir-faire, savoir-être, qualités ou points de vigilance, avant de continuer.";
       box.classList.add("show");
       box.scrollIntoView({behavior:"smooth",block:"center"});
       return false;
@@ -228,12 +228,12 @@ function renderMarketContext(){
   if(!basins.length) basins.push(getBasinById("caen"));
   const totalProjects=basins.reduce((s,b)=>s+b.projects,0);
   const weighted=field=>totalProjects?basins.reduce((s,b)=>s+b[field]*b.projects,0)/totalProjects:0;
-  const difficulty=weighted("difficulty"),seasonal=weighted("seasonal"),propensity=weighted("propensity"),change=weighted("change");
+  const difficulty=weighted("difficulty"),seasonal=weighted("seasonal"),change=weighted("change");
   const title=basins.length===1?basins[0].name:`${basins.length} bassins sélectionnés`;
   const subtitle=basins.length===1?`${basins[0].departmentName} • ${basins[0].regionName}`:`${[...new Set(basins.map(b=>b.departmentName))].join(", ")} • ${[...new Set(basins.map(b=>b.regionName))].join(", ")}`;
   const chips=basins.map(b=>`<span class="territory-chip">${esc(b.name)}</span>`).join("");
   const changeTxt=(change>0?"+":"")+change.toFixed(1)+" %";
-  document.getElementById("marketContext").innerHTML=`<div class="market-context"><div class="market-context-head"><div><strong>Marché de l'emploi : ${esc(title)}</strong><div class="hint">${esc(subtitle)} • BMO 2026 France Travail</div><div class="territory-summary">${chips}</div></div><span class="pill info">Le tri retient le meilleur indice parmi les bassins sélectionnés</span></div><div class="market-context-grid"><div><strong>${totalProjects.toLocaleString("fr-FR")}</strong><span>projets BMO cumulés, tous métiers</span></div><div><strong>${difficulty.toFixed(0)} %</strong><span>difficulté moyenne pondérée</span></div><div><strong>${seasonal.toFixed(0)} %</strong><span>saisonnalité moyenne pondérée</span></div><div><strong>${propensity.toFixed(1)} %</strong><span>propension moyenne à recruter</span></div><div><strong>${changeTxt}</strong><span>évolution moyenne pondérée vs 2025</span></div></div></div>`;
+  document.getElementById("marketContext").innerHTML=`<div class="market-context"><div class="market-context-head"><div><strong>Marché de l'emploi : ${esc(title)}</strong><div class="hint">${esc(subtitle)} • BMO 2026 France Travail</div><div class="territory-summary">${chips}</div></div><span class="pill info">Le tri retient le meilleur indice parmi les bassins sélectionnés</span></div><div class="market-context-grid"><div><strong>${totalProjects.toLocaleString("fr-FR")}</strong><span>projets BMO cumulés, tous métiers</span></div><div><strong>${difficulty.toFixed(0)} %</strong><span>difficulté moyenne pondérée</span></div><div><strong>${seasonal.toFixed(0)} %</strong><span>saisonnalité moyenne pondérée</span></div><div><strong>${changeTxt}</strong><span>évolution moyenne pondérée vs 2025</span></div></div></div>`;
 }
 
 function showResults(){
@@ -325,7 +325,7 @@ function renderJobs(){
           ${j.match.interestBonus?`<span class="pill info">+${j.match.interestBonus} affinité loisirs</span>`:""}
           ${j.match.experienceBonus?`<span class="pill info">+${j.match.experienceBonus} expérience conditions</span>`:""}
           ${j.match.qualityBonus?`<span class="pill good">+${j.match.qualityBonus} qualités</span>`:""}
-          ${j.match.defectPenalty?`<span class="pill warn">-${j.match.defectPenalty} défauts à surveiller</span>`:""}
+          ${j.match.defectPenalty?`<span class="pill warn">-${j.match.defectPenalty} points de vigilance</span>`:""}
           ${j.match.conflicts?`<span class="pill warn">${j.match.conflicts} contrainte forte à vérifier</span>`:""}
         </div>
         <div class="matchbar"><div style="width:${j.match.total}%"></div></div>
@@ -342,7 +342,7 @@ function renderJobs(){
                 <li>Bonus loisirs : <strong>+${j.match.interestBonus}</strong></li>
                 <li>Bonus expérience de travail : <strong>+${j.match.experienceBonus}</strong></li>
                 <li>Bonus qualités : <strong>+${j.match.qualityBonus}</strong></li>
-                <li>Impact défauts : <strong>-${j.match.defectPenalty}</strong></li>
+                <li>Impact points de vigilance : <strong>-${j.match.defectPenalty}</strong></li>
                 <li>Impact handicap / limitations : <strong>-${j.match.accessibilityPenalty}</strong></li>
               </ul>
               ${j.match.accessibility.hard.length||j.match.accessibility.warnings.length?`<div class="accessibility-note ${j.match.accessibility.blocked?"accessibility-blocked":""}">
@@ -374,7 +374,7 @@ function renderJobs(){
                 <div><strong>${j.market.basin.difficulty.toFixed(0)} %</strong><span>difficulté de recrutement du bassin</span></div>
                 <div><strong>${j.market.basin.seasonal.toFixed(0)} %</strong><span>part saisonnière du bassin</span></div>
                 <div><strong>${j.market.nonSeasonal.toFixed(0)} %</strong><span>part non saisonnière</span></div>
-                <div><strong>${j.market.basin.propensity.toFixed(1)} %</strong><span>propension à recruter</span></div>
+
                 <div><strong>${j.market.basin.change>0?"+":""}${j.market.basin.change.toFixed(1)} %</strong><span>évolution vs 2025</span></div>
               </div>
               ${j.market.selectedCount>1?`<div class="summary-card" style="margin-top:10px"><strong>Détail par bassin sélectionné</strong><ul class="small-list">${j.market.markets.map(m=>`<li>${m.basin.name} : <strong>${m.index}/100</strong> • ${m.label}</li>`).join("")}</ul></div>`:""}
@@ -396,7 +396,7 @@ function renderJobs(){
               <strong>Qualités et points de vigilance</strong>
               <ul class="small-list">
                 ${j.match.qualityMatches.length?j.match.qualityMatches.map(x=>`<li>Qualité : ${qualityOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join(""):"<li>Aucun bonus qualité spécifique.</li>"}
-                ${j.match.defectMatches.length?j.match.defectMatches.map(x=>`<li>À surveiller : ${defectOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join(""):"<li>Aucun défaut en conflit direct détecté.</li>"}
+                ${j.match.defectMatches.length?j.match.defectMatches.map(x=>`<li>À surveiller : ${defectOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join(""):"<li>Aucun point de vigilance en conflit direct détecté.</li>"}
               </ul>
             </div>
           </div>
