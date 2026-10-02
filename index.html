@@ -156,14 +156,14 @@
       <div class="results-layout">
         <div class="panel filters">
           <h2 class="subheading">Filtres & tri</h2>
+          <div class="filter-help" style="margin-bottom:14px">Les références ROME et les données BMO identifiées comme France Travail sont sourcées. Les durées de formation et salaires utilisés par cette démo restent des estimations du modèle.</div>
           <div class="filter-row"><label>Domaine</label><select id="domainFilter" onchange="renderJobs()"><option value="">Tous les domaines</option></select></div>
           <div class="filter-row"><label>Accès</label>
             <select id="accessFilter" onchange="renderJobs()">
               <option value="">Tous</option>
               <option value="no_degree">Sans diplôme obligatoire</option>
-              <option value="short">Formation courte ≤ 6 mois</option>
-              <option value="training">Formation possible</option>
-              <option value="apprenticeship">Alternance disponible</option>
+              <option value="short">Formation estimée ≤ 6 mois (démo)</option>
+              <option value="training">Formation estimée nécessaire (démo)</option>
             </select>
           </div>
           <div class="filter-row"><label>Indice local minimum <span class="hint">(démo)</span></label>
