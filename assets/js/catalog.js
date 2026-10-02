@@ -361,3 +361,28 @@ jobs.forEach(job=>{
   job.romeUrl=job.rome?`https://candidat.francetravail.fr/offres/recherche?rome=${job.rome}`:null;
 });
 
+const jobSkillMacroMap={
+  1:["relation-09","accompagnement-01","accompagnement-02","accompagnement-03","accompagnement-04","accompagnement-10","organisation-10","numerique-04"],
+  2:["technique-09","analyse-03","analyse-07","formation-04","formation-08","numerique-06","communication-04"],
+  3:["logistique-01","logistique-02","logistique-03","logistique-05","logistique-07","organisation-05","production-01"],
+  4:["administration-01","administration-02","administration-03","administration-05","administration-06","administration-10","numerique-01","numerique-02"],
+  5:["commerce-02","commerce-03","commerce-04","commerce-05","commerce-06","commerce-08","commerce-11","relation-03"],
+  6:["technique-01","technique-02","technique-03","technique-04","technique-05","technique-06","technique-08","analyse-03"],
+  7:["transport-01","transport-03","transport-04","transport-05","transport-08","transport-09","transport-11","relation-03"],
+  8:["formation-04","formation-07","formation-08","relation-03","relation-07","communication-04","numerique-03","numerique-05","numerique-06"],
+  9:["production-01","production-02","production-03","production-04","production-05","production-07","production-08","production-09"],
+  10:["administration-03","administration-04","administration-10","communication-01","communication-02","numerique-02","numerique-08","numerique-11","relation-09"],
+  11:["technique-06","technique-07","technique-02","organisation-05","organisation-02","securite-01","production-01"],
+  12:["relation-02","relation-03","relation-05","relation-06","relation-08","relation-10","relation-12","communication-10","numerique-04"],
+  13:["creation-08","creation-09","creation-10","creation-11","numerique-06","numerique-07","numerique-10","analyse-03","analyse-04","analyse-09"],
+  14:["creation-01","creation-02","creation-03","creation-06","creation-10","creation-11","numerique-06","organisation-08"],
+  15:["accompagnement-05","accompagnement-06","accompagnement-07","accompagnement-08","accompagnement-09","accompagnement-11","relation-10","organisation-02"],
+  16:["securite-01","securite-03","securite-04","securite-05","securite-08","securite-10","securite-11","relation-03","relation-12"],
+  17:["production-09","production-01","organisation-05","technique-06","production-07","organisation-06"],
+  18:["communication-06","communication-09","formation-02","formation-03","formation-06","relation-10","organisation-02","organisation-06"],
+  19:["numerique-02","numerique-08","numerique-10","administration-04","administration-10","analyse-02","analyse-06","organisation-10"],
+  20:["technique-01","technique-03","technique-04","technique-05","technique-06","technique-07","technique-08","technique-10","analyse-03","analyse-04"],
+  21:["transport-02","transport-04","transport-06","transport-07","transport-08","transport-09","relation-03","relation-10","securite-01"]
+};
+jobs.forEach(job=>{job.skillMacroIds=jobSkillMacroMap[job.id]||[]});
+
