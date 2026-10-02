@@ -345,25 +345,40 @@ function recruitmentTooltipHtml(market){
   </span>`;
 }
 
+function profileCompleteness(){
+  const activePrefs=preferenceOptions.filter(([key])=>(profile.prefs?.[key]||"neutral")!=="neutral").length;
+  const core=(profile.skillMacros||[]).length+(profile.soft||[]).length+(profile.qualitiesSelected||[]).length+activePrefs;
+  const supporting=(profile.experienceSelected||[]).length+Math.min(4,(profile.hobbiesSelected||[]).length);
+  const evidence=core+supporting*.45;
+  if(evidence>=12) return {level:"Bonne",className:"good",message:"Le profil contient assez d'éléments pour obtenir un classement relativement stable."};
+  if(evidence>=6) return {level:"Moyenne",className:"info",message:"Le classement est déjà exploitable, mais quelques informations supplémentaires peuvent encore modifier l'ordre des pistes."};
+  return {level:"Faible",className:"warn",message:"Peu d'éléments sont renseignés. Les premières pistes sont indicatives et peuvent beaucoup évoluer si vous complétez le profil."};
+}
+
 function renderJobs(){
-  if(!profile.skills) readProfile();
+  readProfile();
+  updatePastJobsFilterState();
   const domain=document.getElementById("domainFilter").value;
+  const query=normalizeSearchText(document.getElementById("jobSearch")?.value||"");
   const access=document.getElementById("accessFilter").value;
   const demand=Number(document.getElementById("demandFilter").value);
   const minScore=Number(document.getElementById("scoreFilter").value);
   const sort=document.getElementById("sortFilter").value;
   const showBlocked=document.getElementById("showBlockedJobs")?.checked||false;
+  const hidePast=document.getElementById("hidePastJobs")?.checked||false;
+  const selectedPastTitles=new Set(selectedPastJobIds.map(id=>jobs.find(j=>j.id===id)?.title).filter(Boolean).map(normalizeSearchText));
 
   let list=jobs.map(j=>({...j,match:scoreJob(j),market:localMarket(j)}));
   if(!showBlocked) list=list.filter(j=>!j.match.accessibility.blocked);
+  if(hidePast&&selectedPastTitles.size) list=list.filter(j=>!selectedPastTitles.has(normalizeSearchText(j.title)));
+  if(query) list=list.filter(j=>normalizeSearchText([j.title,j.domain,j.officialTitle||""].join(" ")).includes(query));
   if(domain) list=list.filter(j=>j.domain===domain);
   if(access==="no_degree") list=list.filter(j=>j.education===0);
   if(access==="short") list=list.filter(j=>j.training<=6);
   if(access==="training") list=list.filter(j=>j.training>0);
-  if(access==="apprenticeship") list=list.filter(j=>j.apprenticeship);
-  list=list.filter(j=>j.market.index>=demand && j.match.total>=minScore);
+  list=list.filter(j=>j.market.index>=demand && (j.match.accessibility.blocked?showBlocked:j.match.total>=minScore));
 
-  if(sort==="score") list.sort((a,b)=>b.match.total-a.match.total);
+  if(sort==="score") list.sort((a,b)=>b.match.total-a.match.total || b.market.index-a.market.index || a.training-b.training);
   if(sort==="demand") list.sort((a,b)=>b.market.index-a.market.index || b.match.total-a.match.total);
   if(sort==="training") list.sort((a,b)=>a.training-b.training);
   if(sort==="salary") list.sort((a,b)=>b.salary-a.salary);
@@ -371,18 +386,46 @@ function renderJobs(){
 
   const all=jobs.map(j=>({...j,match:scoreJob(j),market:localMarket(j)}));
   renderMarketContext();
+  const completeness=profileCompleteness();
+  const reliabilityTarget=document.getElementById("profileReliability");
+  if(reliabilityTarget){
+    const cls=completeness.className==="good"?"success":"notice";
+    reliabilityTarget.innerHTML=`<div class="${cls}" style="margin-bottom:14px"><strong>Précision du profil : ${completeness.level}</strong><br>${completeness.message}</div>`;
+  }
+
   const eligible=all.filter(j=>!j.match.accessibility.blocked);
   const blockedCount=all.length-eligible.length;
-  const avg=eligible.length?Math.round(eligible.reduce((s,j)=>s+j.match.total,0)/eligible.length):0;
+  const blockedToggle=document.getElementById("showBlockedJobs");
+  const blockedHelp=document.getElementById("blockedJobsFilterHelp");
+  if(blockedToggle&&blockedHelp){
+    blockedToggle.disabled=blockedCount===0;
+    if(blockedCount===0){
+      blockedToggle.checked=false;
+      blockedHelp.className="filter-help";
+      blockedHelp.textContent="Aucun métier n'est actuellement écarté par vos limitations déclarées.";
+    }else{
+      blockedHelp.className="filter-help warn";
+      blockedHelp.textContent=`${blockedCount} métier${blockedCount>1?"s":""} incompatible${blockedCount>1?"s":""} masqué${blockedCount>1?"s":""} par défaut. Cochez la case pour les afficher malgré leur score de 0 %.`;
+    }
+  }
+
+  const good=eligible.filter(j=>j.match.total>=55).length;
   const strong=eligible.filter(j=>j.match.total>=70).length;
   const best=[...eligible].sort((a,b)=>b.match.total-a.match.total)[0];
   document.getElementById("kpis").innerHTML=`
-    <div class="box"><div class="num">${strong}</div><div class="lbl">métiers à ≥ 70 %</div></div>
-    <div class="box"><div class="num">${avg}%</div><div class="lbl">compatibilité moyenne</div></div>
+    <div class="box"><div class="num">${good}</div><div class="lbl">bonnes correspondances (≥ 55 %)</div></div>
+    <div class="box"><div class="num">${strong}</div><div class="lbl">très bonnes correspondances (≥ 70 %)</div></div>
     <div class="box"><div class="num">${blockedCount}</div><div class="lbl">métiers écartés par limitations déclarées</div></div>
     <div class="box"><div class="num">${best?best.title:"-"}</div><div class="lbl">meilleure piste actuelle</div></div>`;
 
   const container=document.getElementById("jobList");
+  const resultCount=document.getElementById("resultCount");
+  if(resultCount){
+    const parts=[`${list.length.toLocaleString("fr-FR")} métier${list.length>1?"s":""} affiché${list.length>1?"s":""} sur ${jobs.length.toLocaleString("fr-FR")}`];
+    if(hidePast&&selectedPastTitles.size) parts.push("métiers déjà pratiqués masqués");
+    if(showBlocked&&blockedCount) parts.push(`${blockedCount} métier${blockedCount>1?"s":""} incompatible${blockedCount>1?"s":""} inclus`);
+    resultCount.textContent=parts.join(" • ");
+  }
   if(!list.length){
     container.innerHTML=`<div class="empty">Aucun métier ne correspond aux filtres actuels.</div>`;
     return;
@@ -398,7 +441,9 @@ function renderJobs(){
             <div class="job-title">${j.title}</div>
             <div class="hint">${j.officialAccess
               ? `<strong>Accès • France Travail :</strong> ${esc(j.officialAccess)}`
-              : `<strong>Accès • synthèse de démonstration :</strong> ${esc(j.access)}`}</div>
+              : j.demoSecondary
+                ? `<strong>Accès • catalogue de démonstration :</strong> ${esc(j.access)}`
+                : `<strong>Accès • synthèse de démonstration :</strong> ${esc(j.access)}`}</div>
           </div>
           <div class="score">${j.match.total}%</div>
         </div>
@@ -406,7 +451,9 @@ function renderJobs(){
           ${j.market.selectedCount>1?recruitmentTooltipHtml(j.market):`<span class="pill good">Indice local de démonstration : ${demandLabel} (${j.market.index}/100) • ${j.market.basin.name}</span>`}
           ${j.rome
             ? `<a class="pill source-pill" href="${esc(j.romeUrl)}" target="_blank" rel="noopener noreferrer">ROME ${esc(j.rome)} • France Travail ↗</a>`
-            : `<span class="pill warn">Rattachement ROME à préciser</span>`}
+            : j.demoSecondary
+              ? `<span class="pill info">Catalogue large de démonstration</span>`
+              : `<span class="pill warn">Rattachement ROME à préciser</span>`}
           <span class="pill">Formation estimée (démo) : ${trainingLabel}</span>
           <span class="pill">Salaire de référence (démo) : ${j.salary} €</span>
           ${j.match.accessibility.status==="blocked"?`<span class="compat-badge compat-block">Écarté : limitation déclarée</span>`:
@@ -479,7 +526,9 @@ function renderJobs(){
                 ? `<p class="hint"><strong>ROME ${esc(j.rome)}</strong><br>${esc(j.officialTitle||j.title)}</p>
                    <a class="source-link" href="${esc(j.romeUrl)}" target="_blank" rel="noopener noreferrer">Voir France Travail pour ce ROME ↗</a>
                    ${j.sourceNote?`<p class="hint" style="margin-top:8px">${esc(j.sourceNote)}</p>`:""}`
-                : `<p class="hint">${esc(j.sourceNote||"Le rattachement ROME de cet intitulé de démonstration doit encore être précisé.")}</p>`}
+                : j.demoSecondary
+                  ? `<p class="hint"><strong>Fiche secondaire de démonstration.</strong><br>${esc(j.sourceNote||"Le rattachement ROME et les données détaillées restent à enrichir.")}</p>`
+                  : `<p class="hint">${esc(j.sourceNote||"Le rattachement ROME de cet intitulé de démonstration doit encore être précisé.")}</p>`}
             </div>
             <div class="summary-card">
               <strong>Affinité loisirs</strong>
