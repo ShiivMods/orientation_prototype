@@ -157,3 +157,8 @@ label.field{display:block}
 .demo-reset-btn{width:100%;margin-top:18px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#b9c2d2;border-radius:9px;padding:9px 10px;font-size:12px}
 .demo-reset-btn:hover{background:rgba(255,255,255,.08);color:white}
 .mode-btn:disabled{opacity:.55;cursor:default}
+
+.source-pill{display:inline-flex;align-items:center;text-decoration:none;border:1px solid #cfd7ff}
+.source-pill:hover{text-decoration:none;background:#e4e9ff}
+.source-link{color:var(--accent);font-weight:750;text-decoration:none}
+.source-link:hover{text-decoration:underline}
