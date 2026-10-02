@@ -152,3 +152,8 @@ label.field{display:block}
   .filters{position:static}
   .slider-row{grid-template-columns:1fr}
 }
+
+.demo-warning{background:#eef2ff;border:1px solid #cfd7ff;color:#2947a3;padding:12px 14px;border-radius:12px;font-size:13px;margin-bottom:18px;line-height:1.45}
+.demo-reset-btn{width:100%;margin-top:18px;border:1px solid rgba(255,255,255,.2);background:transparent;color:#b9c2d2;border-radius:9px;padding:9px 10px;font-size:12px}
+.demo-reset-btn:hover{background:rgba(255,255,255,.08);color:white}
+.mode-btn:disabled{opacity:.55;cursor:default}
