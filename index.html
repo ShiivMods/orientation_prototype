@@ -88,6 +88,11 @@
         <button class="btn primary" onclick="proposeSkillDiscovery()">Déterminer mes compétences</button>
       </div>
       <div class="block">
+        <h2 class="subheading">Savoir-faire génériques</h2>
+        <p class="hint">Sélectionnez les savoir-faire généraux qui vous correspondent. Vous pourrez ensuite les préciser avec la recherche détaillée plus bas.</p>
+        <div class="tag-wrap" id="skillsTags"></div>
+      </div>
+      <div class="block">
         <h2 class="subheading">Savoir-être</h2>
         <div class="tag-wrap" id="softTags"></div>
       </div>
@@ -102,14 +107,8 @@
         <div class="tag-wrap" id="defectTags"></div>
       </div>
       <div class="block">
-        <h2 class="subheading">Savoir-faire</h2>
-        <p class="hint">Commencez par les savoir-faire qui vous correspondent le mieux. Vous pouvez ensuite préciser votre profil avec la recherche détaillée.</p>
-        <div class="skill-advanced-head">
-          <div>
-            <strong>Savoir-faire</strong>
-            <div class="hint">Recherchez une compétence précise ou explorez les catégories. Les catégories restent repliées pour éviter de surcharger l'écran.</div>
-          </div>
-        </div>
+        <h2 class="subheading">Savoir-faire détaillés</h2>
+        <p class="hint">Recherchez une compétence précise ou explorez les catégories. Les catégories restent repliées pour éviter de surcharger l'écran.</p>
         <div class="skill-browser-toolbar">
           <input id="skillSearch" type="search" placeholder="Rechercher une compétence, ex. Excel, accueil, soudage, JavaScript..." oninput="filterSkillBrowser()" onsearch="filterSkillBrowser()">
           <button type="button" class="btn ghost" style="padding:9px 12px" onclick="clearSkillSearch()">Effacer</button>
