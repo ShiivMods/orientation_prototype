@@ -158,10 +158,12 @@ function jobMacroRequirements(job){
 }
 
 function macroSkillCoverage(job,selectedMacroIds){
-  if(!selectedMacroIds?.length) return null;
+  const genericSkills=profile.genericSkills||[];
+  if(!selectedMacroIds?.length && !genericSkills.length) return null;
   const required=jobMacroRequirements(job);
   if(!required.length) return null;
-  const selected=new Set(selectedMacroIds);
+  const selected=new Set(selectedMacroIds||[]);
+  const generic=new Set(genericSkills);
   let total=0;
 
   required.forEach(reqId=>{
@@ -169,10 +171,12 @@ function macroSkillCoverage(job,selectedMacroIds){
     const req=skillById.get(reqId);
     if(!req) return;
 
-    const sameBase=selectedMacroIds.some(id=>skillById.get(id)?.base===req.base);
+    const sameBase=(selectedMacroIds||[]).some(id=>skillById.get(id)?.base===req.base);
     if(sameBase){total+=0.62;return}
 
-    const sameCategory=selectedMacroIds.some(id=>skillById.get(id)?.category===req.category);
+    if(generic.has(req.base)){total+=0.45;return}
+
+    const sameCategory=(selectedMacroIds||[]).some(id=>skillById.get(id)?.category===req.category);
     if(sameCategory) total+=0.18;
   });
 
@@ -214,7 +218,7 @@ function qualityCompatibility(job){
 }
 
 function profileEvidenceConfidence(pref){
-  const skillUnits=(profile.skillMacros||[]).length;
+  const skillUnits=(profile.skillMacros||[]).length+(profile.genericSkills||[]).length*.65;
   const softUnits=(profile.soft||[]).length;
   const qualityUnits=(profile.qualitiesSelected||[]).length*.8;
   const prefUnits=(pref?.activeCount||0)*.7;
@@ -253,10 +257,14 @@ function scoreJob(job){
   const requiredMacros=jobMacroRequirements(job);
   const selectedMacroSet=new Set(selectedMacros);
 
-  const matchedSkills=requiredMacros
-    .filter(id=>selectedMacroSet.has(id)||selectedMacros.some(sel=>skillById.get(sel)?.base===skillById.get(id)?.base))
-    .map(id=>skillById.get(id)?.label)
-    .filter(Boolean);
+  const genericSkills=profile.genericSkills||[];
+  const matchedSkills=[...new Set([
+    ...requiredMacros
+      .filter(id=>selectedMacroSet.has(id)||selectedMacros.some(sel=>skillById.get(sel)?.base===skillById.get(id)?.base))
+      .map(id=>skillById.get(id)?.label)
+      .filter(Boolean),
+    ...genericSkills.filter(base=>requiredMacros.some(id=>skillById.get(id)?.base===base))
+  ])];
   const matchedSoft=job.soft.filter(x=>selectedSoft.includes(x));
 
   const skillScore=macroSkillCoverage(job,selectedMacros);
