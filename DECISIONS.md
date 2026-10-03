@@ -122,3 +122,12 @@ Ce fichier garde la trace du **pourquoi** des choix importants afin d'éviter qu
 - **Transparence :** les 280 fiches secondaires sont identifiées comme contenu de démonstration et ne sont pas présentées comme des fiches ROME exhaustives.
 - **Exceptions volontaires :** ne pas restaurer les mécanismes précédemment identifiés comme trompeurs ou insuffisamment sourcés, notamment le facteur local pseudo-aléatoire et la propension BMO non vérifiée.
 - **Pourquoi :** retrouver la démonstration produit avancée sans réintroduire ses défauts connus.
+
+
+## ADR-015 — Consentement explicite au partage des données de handicap
+- **Date :** 2026-10-03
+- **Statut :** accepté
+- **Décision :** les handicaps et impacts fonctionnels peuvent être utilisés localement par l'algorithme sans être transmis au conseiller.
+- **Transmission :** une case dédiée, décochée par défaut, autorise explicitement l'ajout de ces informations au dossier conseiller.
+- **Sans consentement :** ces champs sont retirés de la copie du dossier enregistrée dans l'espace conseiller et remplacés par la mention « Non partagé par le bénéficiaire ».
+- **Algorithme :** ce choix de partage n'a aucun effet sur le calcul de compatibilité.
