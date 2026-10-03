@@ -22,7 +22,6 @@ function baseProfile(overrides = {}) {
     maxTraining: 12,
     salary: 1600,
     skills: [],
-    genericSkills: [],
     skillMacros: ['numerique-02', 'analyse-04'],
     soft: ['Curiosité', 'Rigueur', 'Autonomie'],
     qualitiesSelected: [],
@@ -90,7 +89,6 @@ test('neutral preferences do not add compatibility points', () => {
 test('an empty evidence profile does not receive free compatibility points', () => {
   const ctx = makeContext(baseProfile({
     skills: [],
-    genericSkills: [],
     skillMacros: [],
     soft: [],
     qualitiesSelected: [],
@@ -201,12 +199,11 @@ test('large catalog includes diverse searchable professions', () => {
 });
 
 
-test('generic skills contribute less than an exact detailed skill for the same requirement', () => {
-  const genericCtx = makeContext(baseProfile({ genericSkills: ['Utiliser des outils numériques'], skillMacros: [] }));
-  const exactCtx = makeContext(baseProfile({ genericSkills: [], skillMacros: ['creation-09'] }));
-  const genericScore = expr(genericCtx, "macroSkillCoverage({skillMacroIds:['creation-09']}, profile.skillMacros)");
-  const exactScore = expr(exactCtx, "macroSkillCoverage({skillMacroIds:['creation-09']}, profile.skillMacros)");
-  assert.ok(genericScore > 0);
-  assert.ok(genericScore < exactScore);
-  assert.equal(exactScore, 100);
+test('advisor sharing consent does not affect matching', () => {
+  const base = baseProfile({ disabilitiesSelected:['visual_impairment'], functionalLimits:['limited_screen'] });
+  const a = makeContext({ ...base, shareDisabilityWithAdvisor:false });
+  const b = makeContext({ ...base, shareDisabilityWithAdvisor:true });
+  const scoresA = expr(a, 'jobs.slice(0,21).map(j=>scoreJob(j).total)');
+  const scoresB = expr(b, 'jobs.slice(0,21).map(j=>scoreJob(j).total)');
+  assert.deepEqual(Array.from(scoresA), Array.from(scoresB));
 });
