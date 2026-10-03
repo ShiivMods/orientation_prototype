@@ -88,36 +88,6 @@
         <button class="btn primary" onclick="proposeSkillDiscovery()">Déterminer mes compétences</button>
       </div>
       <div class="block">
-        <h2 class="subheading">Savoir-faire</h2>
-        <p class="hint">Commencez par les savoir-faire qui vous correspondent le mieux. Vous pouvez ensuite préciser votre profil avec la recherche détaillée.</p>
-        <div class="skill-common-box">
-          <div class="skill-common-head">
-            <div>
-              <strong>Savoir-faire courants</strong>
-              <div class="hint">Sélection rapide. Ces choix restent volontairement généraux.</div>
-            </div>
-            <span id="genericSkillSelectionCount" class="skill-selected-badge">0 sélectionné</span>
-          </div>
-          <div class="tag-wrap" id="skillsTags"></div>
-        </div>
-
-        <div class="skill-advanced-head">
-          <div>
-            <strong>Préciser mes savoir-faire</strong>
-            <div class="hint">Optionnel. Recherchez une compétence plus précise ou explorez les catégories.</div>
-          </div>
-        </div>
-        <div class="skill-browser-toolbar">
-          <input id="skillSearch" type="search" placeholder="Rechercher une compétence, ex. Excel, accueil, soudage, JavaScript..." oninput="filterSkillBrowser()" onsearch="filterSkillBrowser()">
-          <button type="button" class="btn ghost" style="padding:9px 12px" onclick="clearSkillSearch()">Effacer</button>
-          <label class="toggle-line"><input id="showSkillDetails" type="checkbox" onchange="toggleSkillDetails()"> Afficher les précisions</label>
-          <span id="skillSelectionCount" class="skill-selected-badge">0 sélectionnée</span>
-        </div>
-        <div class="skill-browser-meta"><strong>167 compétences principales</strong> • 668 précisions recherchables • 15 catégories • couche UX JusteCap inspirée de la structure ROME</div>
-        <div id="skillSearchStatus" class="hint" style="margin-top:7px"></div>
-        <div id="skillsBrowser"></div>
-      </div>
-      <div class="block">
         <h2 class="subheading">Savoir-être</h2>
         <div class="tag-wrap" id="softTags"></div>
       </div>
@@ -130,6 +100,25 @@
         <h2 class="subheading">Points de vigilance</h2>
         <p class="hint">Sélectionnez les points qui peuvent réellement vous poser difficulté au travail. Ils ne bloquent jamais un métier, mais peuvent signaler une incompatibilité à examiner.</p>
         <div class="tag-wrap" id="defectTags"></div>
+      </div>
+      <div class="block">
+        <h2 class="subheading">Savoir-faire</h2>
+        <p class="hint">Commencez par les savoir-faire qui vous correspondent le mieux. Vous pouvez ensuite préciser votre profil avec la recherche détaillée.</p>
+        <div class="skill-advanced-head">
+          <div>
+            <strong>Savoir-faire</strong>
+            <div class="hint">Recherchez une compétence précise ou explorez les catégories. Les catégories restent repliées pour éviter de surcharger l'écran.</div>
+          </div>
+        </div>
+        <div class="skill-browser-toolbar">
+          <input id="skillSearch" type="search" placeholder="Rechercher une compétence, ex. Excel, accueil, soudage, JavaScript..." oninput="filterSkillBrowser()" onsearch="filterSkillBrowser()">
+          <button type="button" class="btn ghost" style="padding:9px 12px" onclick="clearSkillSearch()">Effacer</button>
+          <label class="toggle-line"><input id="showSkillDetails" type="checkbox" onchange="toggleSkillDetails()"> Afficher les précisions</label>
+          <span id="skillSelectionCount" class="skill-selected-badge">0 sélectionnée</span>
+        </div>
+        <div class="skill-browser-meta"><strong>167 compétences principales</strong> • 668 précisions recherchables • 15 catégories • couche UX JusteCap inspirée de la structure ROME</div>
+        <div id="skillSearchStatus" class="hint" style="margin-top:7px"></div>
+        <div id="skillsBrowser"></div>
       </div>
       <div id="aptitudeValidation" class="validation-error" role="alert"></div>
       <div class="actions"><button class="btn secondary" onclick="prevStep()">Retour</button><button class="btn primary" onclick="nextStep()">Continuer</button></div>
@@ -156,8 +145,8 @@
         <h2 class="subheading">Salaire minimum souhaité</h2>
         <div class="slider-row">
           <div>Net mensuel approximatif</div>
-          <input id="salary" type="range" min="0" max="3500" step="100" value="1600" oninput="salaryValue.textContent=this.value+' €'">
-          <strong id="salaryValue">1600 €</strong>
+          <input id="salary" type="range" min="0" max="3500" step="1" value="1478" oninput="salaryValue.textContent=Number(this.value).toLocaleString('fr-FR')+' €'">
+          <strong id="salaryValue">1 478 €</strong>
         </div>
       </div>
       <div class="block" style="margin-top:22px">
@@ -174,6 +163,10 @@
             <div class="tag-wrap" id="functionalLimitTags"></div>
           </div>
           <div class="hint" style="margin-top:8px">Pour une profession soumise à une aptitude médicale ou réglementaire, JusteCap signale qu'une vérification est nécessaire. L'application ne remplace pas un avis médical.</div>
+          <label class="sensitive-share-consent">
+            <input id="shareDisabilityWithAdvisor" type="checkbox">
+            <span><strong>Autoriser le partage de ces informations avec mon conseiller</strong><br><span class="hint">Sans cette autorisation, vos handicaps et impacts fonctionnels restent utilisés uniquement pour calculer vos résultats et ne sont pas ajoutés au dossier conseiller.</span></span>
+          </label>
         </div>
       </div>
       <div class="actions"><button class="btn secondary" onclick="prevStep()">Retour</button><button class="btn primary" onclick="showResults()">Voir les métiers</button></div>
