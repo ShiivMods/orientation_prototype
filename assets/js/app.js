@@ -78,6 +78,7 @@ let profile={};
 let lastSentDossierRef=null;
 let selectedPastJobIds=[];
 let selectedSkillMacroState=new Set();
+let selectedGenericSkillState=new Set();
 let skillDiscoveryReturnStep=1;
 
 function escAttr(value){
@@ -159,8 +160,15 @@ function updateSkillSelectionCount(){
   if(el) el.textContent=`${selectedSkillMacroState.size} sélectionnée${selectedSkillMacroState.size>1?"s":""}`;
 }
 function selectedSkillMacroIds(){return [...selectedSkillMacroState]}
+function selectedGenericSkills(){return [...selectedGenericSkillState]}
 function selectedSkillBases(){
-  return [...new Set([...selectedSkillMacroState].map(id=>skillById.get(id)?.base).filter(Boolean))];
+  return [...new Set([
+    ...selectedGenericSkillState,
+    ...[...selectedSkillMacroState].map(id=>skillById.get(id)?.base).filter(Boolean)
+  ])];
+}
+function toggleGenericSkill(value,checked){
+  if(checked) selectedGenericSkillState.add(value); else selectedGenericSkillState.delete(value);
 }
 
 function init(){
@@ -171,6 +179,8 @@ function init(){
       <div class="step-num">${i+1}</div><div><strong>${s[0]}</strong><br><span style="font-size:11px">${s[1]}</span></div>
     </div>`).join("");
 
+  document.getElementById("skillsTags").innerHTML = skillOptions.map((label,i)=>`
+    <div class="tag"><input type="checkbox" id="generic_skill_${i}" value="${escAttr(label)}" name="genericSkills" onchange="toggleGenericSkill(this.value,this.checked)"><label for="generic_skill_${i}">${esc(label)}</label></div>`).join("");
   renderSkillBrowser();
   document.getElementById("softTags").innerHTML = softOptions.map((s,i)=>`
     <div class="tag"><input type="checkbox" id="soft_${i}" value="${s}" name="soft"><label for="soft_${i}">${s}</label></div>`).join("");
@@ -252,7 +262,7 @@ function validateCurrentStep(){
     }
   }
   if(currentStep===1){
-    const aptitudeCount=selectedSkillMacroState.size+document.querySelectorAll(
+    const aptitudeCount=selectedGenericSkillState.size+selectedSkillMacroState.size+document.querySelectorAll(
       'input[name="soft"]:checked, input[name="qualitiesSelected"]:checked, input[name="defectsSelected"]:checked'
     ).length;
     if(aptitudeCount<1){
@@ -294,9 +304,13 @@ function readProfile(){
     advisorId:document.getElementById("advisor").value,
     maxTraining:Number(document.getElementById("maxTraining").value),
     salary:Number(document.getElementById("salary").value),
+    genericSkills:selectedGenericSkills(),
     skillMacros:selectedSkillMacroIds(),
     skillBases:selectedSkillBases(),
-    skills:selectedSkillMacroIds().map(id=>skillById.get(id)?.label).filter(Boolean),
+    skills:[...new Set([
+      ...selectedGenericSkills(),
+      ...selectedSkillMacroIds().map(id=>skillById.get(id)?.label).filter(Boolean)
+    ])],
     soft:[...document.querySelectorAll('input[name="soft"]:checked')].map(x=>x.value),
     qualitiesSelected:[...document.querySelectorAll('input[name="qualitiesSelected"]:checked')].map(x=>x.value),
     defectsSelected:[...document.querySelectorAll('input[name="defectsSelected"]:checked')].map(x=>x.value),
@@ -348,7 +362,7 @@ function recruitmentTooltipHtml(market){
 
 function profileCompleteness(){
   const activePrefs=preferenceOptions.filter(([key])=>(profile.prefs?.[key]||"neutral")!=="neutral").length;
-  const core=(profile.skillMacros||[]).length+(profile.soft||[]).length+(profile.qualitiesSelected||[]).length+activePrefs;
+  const core=(profile.genericSkills||[]).length+(profile.skillMacros||[]).length+(profile.soft||[]).length+(profile.qualitiesSelected||[]).length+activePrefs;
   const supporting=(profile.experienceSelected||[]).length+Math.min(4,(profile.hobbiesSelected||[]).length);
   const evidence=core+supporting*.45;
   if(evidence>=12) return {level:"Bonne",className:"good",message:"Le profil contient assez d'éléments pour obtenir un classement relativement stable."};
