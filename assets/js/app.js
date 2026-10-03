@@ -426,12 +426,13 @@ function renderJobs(){
 
   const good=eligible.filter(j=>j.match.total>=55).length;
   const strong=eligible.filter(j=>j.match.total>=70).length;
-  const best=[...eligible].sort((a,b)=>b.match.total-a.match.total)[0];
+  const defaultRank=(a,b)=>b.match.total-a.match.total || b.market.index-a.market.index || a.training-b.training || a.title.localeCompare(b.title,"fr");
+  const best=[...eligible].sort(defaultRank)[0];
   document.getElementById("kpis").innerHTML=`
-    <div class="box"><div class="num">${good}</div><div class="lbl">bonnes correspondances (≥ 55 %)</div></div>
-    <div class="box"><div class="num">${strong}</div><div class="lbl">très bonnes correspondances (≥ 70 %)</div></div>
+    <div class="box"><div class="num">${good}</div><div class="lbl">pistes à ≥ 55 %</div></div>
+    <div class="box"><div class="num">${strong}</div><div class="lbl">pistes à ≥ 70 %</div></div>
     <div class="box"><div class="num">${blockedCount}</div><div class="lbl">métiers écartés par limitations déclarées</div></div>
-    <div class="box"><div class="num">${best?best.title:"-"}</div><div class="lbl">meilleure piste actuelle</div></div>`;
+    <div class="box"><div class="num">${best?best.title:"-"}</div><div class="lbl">première piste actuelle</div></div>`;
 
   const container=document.getElementById("jobList");
   const resultCount=document.getElementById("resultCount");
@@ -457,8 +458,8 @@ function renderJobs(){
             <div class="hint">${j.officialAccess
               ? `<strong>Accès • France Travail :</strong> ${esc(j.officialAccess)}`
               : j.demoSecondary
-                ? `<strong>Accès • catalogue de démonstration :</strong> ${esc(j.access)}`
-                : `<strong>Accès • synthèse de démonstration :</strong> ${esc(j.access)}`}</div>
+                ? `<strong>Accès estimé (démo) :</strong> ${esc(j.access)}`
+                : `<strong>Accès estimé (démo) :</strong> ${esc(j.access)}`}</div>
           </div>
           <div class="score">${j.match.total}%</div>
         </div>
