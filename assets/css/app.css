@@ -189,6 +189,8 @@ label.field{display:block}
 .filter-help.good{color:#147a4b}
 .filter-help.warn{color:#9a5b00}
 
-.skill-common-box{border:1px solid var(--border);background:#f8fafc;border-radius:12px;padding:14px;margin:12px 0 18px}
-.skill-common-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
 .skill-advanced-head{border-top:1px solid var(--border);padding-top:16px;margin-top:4px}
+
+.sensitive-share-consent{display:flex;gap:10px;align-items:flex-start;margin-top:14px;padding:12px 13px;border:1px solid #cfd7ff;background:#f7f8ff;border-radius:10px;cursor:pointer}
+.sensitive-share-consent input{margin-top:3px}
+.sensitive-share-consent strong{font-size:13px}
