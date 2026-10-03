@@ -67,18 +67,7 @@
             <option value="60">Sans limite particulière</option>
           </select>
         </label>
-        <div class="disability-panel">
-          <h3>Handicap(s)</h3>
-          <div class="hint">Facultatif. Sélectionnez les handicaps que vous souhaitez prendre en compte dans l'orientation. Plusieurs choix sont possibles.</div>
-          <div class="tag-wrap" id="disabilityTags"></div>
 
-          <div class="disability-sub">
-            <h3>Impacts fonctionnels à prendre en compte</h3>
-            <div class="hint">Ces choix influencent directement les métiers proposés. Ils évitent de supposer automatiquement ce qu'une personne peut ou ne peut pas faire à partir du seul nom de son handicap.</div>
-            <div class="tag-wrap" id="functionalLimitTags"></div>
-          </div>
-          <div class="hint" style="margin-top:8px">Pour une profession soumise à une aptitude médicale ou réglementaire, JusteCap signale qu'une vérification est nécessaire. L'application ne remplace pas un avis médical.</div>
-        </div>
       </div>
       <div class="block" style="margin-top:24px">
         <h2 class="subheading">Accompagnement</h2>
@@ -100,7 +89,24 @@
       </div>
       <div class="block">
         <h2 class="subheading">Savoir-faire</h2>
-        <p class="hint">La base de référence est beaucoup plus riche que ce qui peut être affiché à l'écran. JusteCap utilise ici une couche simplifiée de macro-compétences pour éviter une liste interminable. Recherchez un terme précis ou ouvrez une catégorie.</p>
+        <p class="hint">Commencez par les savoir-faire qui vous correspondent le mieux. Vous pouvez ensuite préciser votre profil avec la recherche détaillée.</p>
+        <div class="skill-common-box">
+          <div class="skill-common-head">
+            <div>
+              <strong>Savoir-faire courants</strong>
+              <div class="hint">Sélection rapide. Ces choix restent volontairement généraux.</div>
+            </div>
+            <span id="genericSkillSelectionCount" class="skill-selected-badge">0 sélectionné</span>
+          </div>
+          <div class="tag-wrap" id="skillsTags"></div>
+        </div>
+
+        <div class="skill-advanced-head">
+          <div>
+            <strong>Préciser mes savoir-faire</strong>
+            <div class="hint">Optionnel. Recherchez une compétence plus précise ou explorez les catégories.</div>
+          </div>
+        </div>
         <div class="skill-browser-toolbar">
           <input id="skillSearch" type="search" placeholder="Rechercher une compétence, ex. Excel, accueil, soudage, JavaScript..." oninput="filterSkillBrowser()" onsearch="filterSkillBrowser()">
           <button type="button" class="btn ghost" style="padding:9px 12px" onclick="clearSkillSearch()">Effacer</button>
@@ -110,7 +116,6 @@
         <div class="skill-browser-meta"><strong>167 compétences principales</strong> • 668 précisions recherchables • 15 catégories • couche UX JusteCap inspirée de la structure ROME</div>
         <div id="skillSearchStatus" class="hint" style="margin-top:7px"></div>
         <div id="skillsBrowser"></div>
-        <div id="skillsTags" style="display:none"></div>
       </div>
       <div class="block">
         <h2 class="subheading">Savoir-être</h2>
@@ -153,6 +158,22 @@
           <div>Net mensuel approximatif</div>
           <input id="salary" type="range" min="0" max="3500" step="100" value="1600" oninput="salaryValue.textContent=this.value+' €'">
           <strong id="salaryValue">1600 €</strong>
+        </div>
+      </div>
+      <div class="block" style="margin-top:22px">
+        <h2 class="subheading">Contraintes personnelles et accessibilité</h2>
+        <p class="hint">Facultatif. Cette partie n'est utile que si certaines contraintes doivent être prises en compte dans les métiers proposés. Vous pouvez la laisser entièrement vide.</p>
+        <div class="disability-panel">
+          <h3>Handicap(s)</h3>
+          <div class="hint">Vous pouvez signaler un handicap si vous souhaitez qu'il soit pris en compte. JusteCap ne déduit jamais automatiquement vos capacités à partir de ce seul choix.</div>
+          <div class="tag-wrap" id="disabilityTags"></div>
+
+          <div class="disability-sub">
+            <h3>Impacts fonctionnels à prendre en compte</h3>
+            <div class="hint">Ces éléments influencent directement les métiers proposés. Ils décrivent ce qui peut réellement poser difficulté dans un contexte professionnel.</div>
+            <div class="tag-wrap" id="functionalLimitTags"></div>
+          </div>
+          <div class="hint" style="margin-top:8px">Pour une profession soumise à une aptitude médicale ou réglementaire, JusteCap signale qu'une vérification est nécessaire. L'application ne remplace pas un avis médical.</div>
         </div>
       </div>
       <div class="actions"><button class="btn secondary" onclick="prevStep()">Retour</button><button class="btn primary" onclick="showResults()">Voir les métiers</button></div>
