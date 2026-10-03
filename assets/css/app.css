@@ -194,3 +194,8 @@ label.field{display:block}
 .sensitive-share-consent{display:flex;gap:10px;align-items:flex-start;margin-top:14px;padding:12px 13px;border:1px solid #cfd7ff;background:#f7f8ff;border-radius:10px;cursor:pointer}
 .sensitive-share-consent input{margin-top:3px}
 .sensitive-share-consent strong{font-size:13px}
+
+.info-note{background:#f4f7ff;border:1px solid #cfd7ff;color:#31436f;padding:12px 14px;border-radius:11px;font-size:13px;line-height:1.5}
+.btn,.tag label,.mode-btn{transition:background .15s,border-color .15s,box-shadow .15s,transform .15s}
+.btn:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(30,45,75,.10)}
+.tag label:hover{border-color:#bcc7dd;background:#fafbfe}
