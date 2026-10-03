@@ -1,0 +1,55 @@
+name: Quality checks
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check assets/js/catalog.js
+          node --check assets/js/skills-taxonomy.js
+          node --check assets/js/jobs-large.js
+          node --check assets/js/matching-engine.js
+          node --check assets/js/app.js
+
+      - name: Run matching engine tests
+        run: node --test tests/matching-engine.test.js
+
+      - name: Verify static application structure
+        run: |
+          grep -q 'assets/css/app.css' index.html
+          grep -q 'assets/js/catalog.js' index.html
+          grep -q 'assets/js/skills-taxonomy.js' index.html
+          grep -q 'assets/js/jobs-large.js' index.html
+          grep -q 'assets/js/matching-engine.js' index.html
+          grep -q 'assets/js/app.js' index.html
+          grep -q 'id="jobSearch"' index.html
+          grep -q 'id="hidePastJobs"' index.html
+          grep -q 'id="profileReliability"' index.html
+          grep -q 'id="resultCount"' index.html
+          grep -q 'id="pastJobSearch"' index.html
+          if grep -q 'function advisorLogin' index.html; then
+            echo "Application JavaScript must not be duplicated inline in index.html."
+            exit 1
+          fi
+
+      - name: Verify required project documentation
+        run: |
+          test -f README.md
+          test -f SECURITY.md
+          test -f DECISIONS.md
+          test -f docs/PRODUCTION_READINESS.md
+          test -f docs/PREFLIGHT_AUDIT.md
