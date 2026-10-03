@@ -141,3 +141,27 @@ Le test visuel et le parcours complet dans un navigateur public sont volontairem
 - **Diplôme : faut-il distinguer « Non renseigné » et « Sans diplôme » dans le traitement ?**
   - Hypothèse actuelle pour la démonstration : les deux sont traités de la même manière par le moteur, faute d'information prouvant un niveau supérieur.
   - Point à valider avec un professionnel : cette distinction apporte-t-elle une valeur dans l'accompagnement ou le calcul, au-delà de la différence sémantique ?
+
+
+## Jour 1 — Démonstration JusteCap validée
+- **Date :** 2026-10-03
+- **Statut :** terminé pour la démonstration desktop.
+- Parcours principal vérifié visuellement par captures utilisateur.
+- Profil allégé ; accessibilité déplacée dans les préférences.
+- Consentement explicite pour le partage des données de handicap au conseiller.
+- SMIC net 2026 utilisé comme valeur salariale par défaut de la démo.
+- Structure Aptitudes validée : déterminer mes compétences → savoir-faire génériques → savoir-être → qualités → points de vigilance → savoir-faire détaillés.
+- Taxonomie détaillée restaurée : 15 catégories, 167 macro-compétences, 668 précisions.
+- Catalogue large restauré : 301 métiers, dont 21 fiches enrichies.
+- Recherche métier, filtres, précision du profil, métiers passés et espace conseiller restaurés.
+- Sources ROME / BMO distinguées des estimations internes de démonstration.
+- Scoring et mappings métier → compétences couverts par tests.
+- Derniers ajustements de présentation : KPI cohérent avec le tri des résultats, libellés moins affirmatifs, information catalogue rendue plus neutre.
+- CI GitHub verte après la passe finale.
+
+### Restent volontairement hors Jour 1
+- Responsive / navigation mobile.
+- Déploiement public et test depuis URL externe.
+- Connexion réelle du bouton D&D CV.
+- Raffinement futur du scoring et enrichissement ROME du catalogue secondaire.
+- Polish produit au-delà du besoin de démonstration.
