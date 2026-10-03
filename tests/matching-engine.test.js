@@ -22,6 +22,7 @@ function baseProfile(overrides = {}) {
     maxTraining: 12,
     salary: 1600,
     skills: [],
+    genericSkills: [],
     skillMacros: ['numerique-02', 'analyse-04'],
     soft: ['Curiosité', 'Rigueur', 'Autonomie'],
     qualitiesSelected: [],
@@ -89,6 +90,7 @@ test('neutral preferences do not add compatibility points', () => {
 test('an empty evidence profile does not receive free compatibility points', () => {
   const ctx = makeContext(baseProfile({
     skills: [],
+    genericSkills: [],
     skillMacros: [],
     soft: [],
     qualitiesSelected: [],
@@ -196,4 +198,15 @@ test('large catalog includes diverse searchable professions', () => {
   for (const expected of ['Plombier','Data analyst','Infirmier','Boulanger','Agent immobilier','Éducateur spécialisé']) {
     assert.ok(titles.includes(expected), expected + ' missing from catalog');
   }
+});
+
+
+test('generic skills contribute less than an exact detailed skill for the same requirement', () => {
+  const genericCtx = makeContext(baseProfile({ genericSkills: ['Utiliser des outils numériques'], skillMacros: [] }));
+  const exactCtx = makeContext(baseProfile({ genericSkills: [], skillMacros: ['creation-09'] }));
+  const genericScore = expr(genericCtx, "macroSkillCoverage({skillMacroIds:['creation-09']}, profile.skillMacros)");
+  const exactScore = expr(exactCtx, "macroSkillCoverage({skillMacroIds:['creation-09']}, profile.skillMacros)");
+  assert.ok(genericScore > 0);
+  assert.ok(genericScore < exactScore);
+  assert.equal(exactScore, 100);
 });
