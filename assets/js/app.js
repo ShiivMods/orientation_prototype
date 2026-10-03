@@ -78,7 +78,6 @@ let profile={};
 let lastSentDossierRef=null;
 let selectedPastJobIds=[];
 let selectedSkillMacroState=new Set();
-let selectedGenericSkillState=new Set();
 let skillDiscoveryReturnStep=1;
 
 function escAttr(value){
@@ -160,20 +159,8 @@ function updateSkillSelectionCount(){
   if(el) el.textContent=`${selectedSkillMacroState.size} sélectionnée${selectedSkillMacroState.size>1?"s":""}`;
 }
 function selectedSkillMacroIds(){return [...selectedSkillMacroState]}
-function selectedGenericSkills(){return [...selectedGenericSkillState]}
 function selectedSkillBases(){
-  return [...new Set([
-    ...selectedGenericSkillState,
-    ...[...selectedSkillMacroState].map(id=>skillById.get(id)?.base).filter(Boolean)
-  ])];
-}
-function toggleGenericSkill(value,checked){
-  if(checked) selectedGenericSkillState.add(value); else selectedGenericSkillState.delete(value);
-  updateGenericSkillSelectionCount();
-}
-function updateGenericSkillSelectionCount(){
-  const el=document.getElementById("genericSkillSelectionCount");
-  if(el) el.textContent=`${selectedGenericSkillState.size} sélectionné${selectedGenericSkillState.size>1?"s":""}`;
+  return [...new Set([...selectedSkillMacroState].map(id=>skillById.get(id)?.base).filter(Boolean))];
 }
 
 function init(){
@@ -184,9 +171,6 @@ function init(){
       <div class="step-num">${i+1}</div><div><strong>${s[0]}</strong><br><span style="font-size:11px">${s[1]}</span></div>
     </div>`).join("");
 
-  document.getElementById("skillsTags").innerHTML = skillOptions.map((label,i)=>`
-    <div class="tag"><input type="checkbox" id="generic_skill_${i}" value="${escAttr(label)}" name="genericSkills" onchange="toggleGenericSkill(this.value,this.checked)"><label for="generic_skill_${i}">${esc(label)}</label></div>`).join("");
-  updateGenericSkillSelectionCount();
   renderSkillBrowser();
   document.getElementById("softTags").innerHTML = softOptions.map((s,i)=>`
     <div class="tag"><input type="checkbox" id="soft_${i}" value="${s}" name="soft"><label for="soft_${i}">${s}</label></div>`).join("");
@@ -268,7 +252,7 @@ function validateCurrentStep(){
     }
   }
   if(currentStep===1){
-    const aptitudeCount=selectedGenericSkillState.size+selectedSkillMacroState.size+document.querySelectorAll(
+    const aptitudeCount=selectedSkillMacroState.size+document.querySelectorAll(
       'input[name="soft"]:checked, input[name="qualitiesSelected"]:checked, input[name="defectsSelected"]:checked'
     ).length;
     if(aptitudeCount<1){
@@ -299,6 +283,7 @@ function readProfile(){
     situation:document.getElementById("situation").value,
     disabilitiesSelected:[...document.querySelectorAll('input[name="disabilitiesSelected"]:checked')].map(x=>x.value),
     functionalLimits:[...document.querySelectorAll('input[name="functionalLimits"]:checked')].map(x=>x.value),
+    shareDisabilityWithAdvisor:document.getElementById("shareDisabilityWithAdvisor")?.checked||false,
     regionId:primaryBasin.regionId,
     departmentCode:primaryBasin.departmentCode,
     employmentAreaId:primaryBasin.id,
@@ -309,13 +294,9 @@ function readProfile(){
     advisorId:document.getElementById("advisor").value,
     maxTraining:Number(document.getElementById("maxTraining").value),
     salary:Number(document.getElementById("salary").value),
-    genericSkills:selectedGenericSkills(),
     skillMacros:selectedSkillMacroIds(),
     skillBases:selectedSkillBases(),
-    skills:[...new Set([
-      ...selectedGenericSkills(),
-      ...selectedSkillMacroIds().map(id=>skillById.get(id)?.label).filter(Boolean)
-    ])],
+    skills:selectedSkillMacroIds().map(id=>skillById.get(id)?.label).filter(Boolean),
     soft:[...document.querySelectorAll('input[name="soft"]:checked')].map(x=>x.value),
     qualitiesSelected:[...document.querySelectorAll('input[name="qualitiesSelected"]:checked')].map(x=>x.value),
     defectsSelected:[...document.querySelectorAll('input[name="defectsSelected"]:checked')].map(x=>x.value),
@@ -367,7 +348,7 @@ function recruitmentTooltipHtml(market){
 
 function profileCompleteness(){
   const activePrefs=preferenceOptions.filter(([key])=>(profile.prefs?.[key]||"neutral")!=="neutral").length;
-  const core=(profile.genericSkills||[]).length+(profile.skillMacros||[]).length+(profile.soft||[]).length+(profile.qualitiesSelected||[]).length+activePrefs;
+  const core=(profile.skillMacros||[]).length+(profile.soft||[]).length+(profile.qualitiesSelected||[]).length+activePrefs;
   const supporting=(profile.experienceSelected||[]).length+Math.min(4,(profile.hobbiesSelected||[]).length);
   const evidence=core+supporting*.45;
   if(evidence>=12) return {level:"Bonne",className:"good",message:"Le profil contient assez d'éléments pour obtenir un classement relativement stable."};
@@ -613,6 +594,14 @@ function buildDossierFromCurrentProfile(){
 }
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function labelsFrom(keys,options){return (keys||[]).map(k=>options.find(o=>o[0]===k)?.[1]||k)}
+function dossierDisabilityText(d){
+  if(d.disabilityDataWithheld) return "Non partagé par le bénéficiaire";
+  return labelsFrom(d.disabilitiesSelected,disabilityOptions).join(", ")||"Non renseigné";
+}
+function dossierFunctionalText(d){
+  if(d.disabilityDataWithheld) return "Non partagé par le bénéficiaire";
+  return labelsFrom(d.functionalLimits,functionalLimitOptions).join(", ")||"Aucun renseigné";
+}
 function preferenceLabel(v){return ({want:"Je préfère",neutral:"Peu importe",avoid:"À éviter",impossible:"Impossible"})[v]||v}
 function downloadableDossierHtml(d, heading){
   const inst=institutions.find(i=>i.id===d.institutionId),adv=inst?.advisors.find(a=>a.id===d.advisorId);
@@ -620,7 +609,7 @@ function downloadableDossierHtml(d, heading){
   const prefs=Object.entries(d.prefs||{}).map(([k,v])=>`${preferenceOptions.find(p=>p[0]===k)?.[1]||k} : ${preferenceLabel(v)}`);
   return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${esc(heading)}</title><style>body{font-family:Arial,sans-serif;max-width:900px;margin:40px auto;padding:0 24px;color:#172033}h1{margin-bottom:4px}h2{margin-top:28px;border-bottom:1px solid #ddd;padding-bottom:7px}p,li{line-height:1.5}.meta{color:#667085}.score{font-weight:700}.box{background:#f6f7f9;border:1px solid #ddd;border-radius:10px;padding:14px;margin:10px 0}@media print{body{margin:0;max-width:none}.box{break-inside:avoid}}</style></head><body>
   <h1>${esc(heading)}</h1><p class="meta">${esc(d.firstName)} ${esc(d.lastName)} • ${esc(d.ref||"")} • ${new Date(d.date||Date.now()).toLocaleString("fr-FR")}</p>
-  <h2>Profil</h2><div class="box"><p><strong>Âge :</strong> ${esc(d.age||"Non renseigné")}</p><p><strong>Situation :</strong> ${esc(d.situation||"Non renseignée")}</p><p><strong>Handicap(s) :</strong> ${esc(labelsFrom(d.disabilitiesSelected,disabilityOptions).join(", ")||"Non renseigné")}</p><p><strong>Impacts fonctionnels :</strong> ${esc(labelsFrom(d.functionalLimits,functionalLimitOptions).join(", ")||"Aucun renseigné")}</p><p><strong>Bassin(s) d'emploi :</strong> ${esc((d.employmentAreas&&d.employmentAreas.length?d.employmentAreas.join(", "):d.employmentArea)||"Non renseigné")}</p><p><strong>Établissement :</strong> ${esc(inst?.name||"Non renseigné")}</p><p><strong>Conseiller :</strong> ${esc(adv?adv.firstName+" "+adv.lastName:"Non renseigné")}</p></div>
+  <h2>Profil</h2><div class="box"><p><strong>Âge :</strong> ${esc(d.age||"Non renseigné")}</p><p><strong>Situation :</strong> ${esc(d.situation||"Non renseignée")}</p><p><strong>Handicap(s) :</strong> ${esc(dossierDisabilityText(d))}</p><p><strong>Impacts fonctionnels :</strong> ${esc(dossierFunctionalText(d))}</p><p><strong>Bassin(s) d'emploi :</strong> ${esc((d.employmentAreas&&d.employmentAreas.length?d.employmentAreas.join(", "):d.employmentArea)||"Non renseigné")}</p><p><strong>Établissement :</strong> ${esc(inst?.name||"Non renseigné")}</p><p><strong>Conseiller :</strong> ${esc(adv?adv.firstName+" "+adv.lastName:"Non renseigné")}</p></div>
   <h2>Aptitudes</h2><h3>Savoir-faire</h3>${list(d.skills)}<h3>Savoir-être</h3>${list(d.soft)}<h3>Qualités</h3>${list(labelsFrom(d.qualitiesSelected,qualityOptions))}<h3>Points de vigilance</h3>${list(labelsFrom(d.defectsSelected,defectOptions))}
   <h2>Expérience et centres d'intérêt</h2><h3>Loisirs</h3>${list(labelsFrom(d.hobbiesSelected,hobbyOptions))}<h3>Conditions de travail déjà pratiquées</h3>${list(labelsFrom(d.experienceSelected,experienceOptions))}
   <h2>Préférences</h2>${list(prefs)}<p><strong>Salaire minimum souhaité :</strong> ${esc(d.salary||0)} € net mensuel approximatif</p>
@@ -644,8 +633,18 @@ function sendResultsToAdvisor(){
   if(!adv){box.innerHTML='<div class="notice">Aucun conseiller n\'est sélectionné. Revenez au profil pour choisir votre établissement et votre conseiller, ou utilisez « Télécharger mes résultats » pour les conserver.</div>';return}
   if(lastSentDossierRef){box.innerHTML=`<div class="success">Ce dossier est déjà présent dans l’espace conseiller de démonstration. Référence : <span class="codebox">${esc(lastSentDossierRef)}</span></div>`;return}
   const d=buildDossierFromCurrentProfile();
+  if(!d.shareDisabilityWithAdvisor){
+    d.disabilitiesSelected=[];
+    d.functionalLimits=[];
+    d.disabilityDataWithheld=true;
+  }else{
+    d.disabilityDataWithheld=false;
+  }
   const arr=getDossiers();arr.unshift(d);setDossiers(arr);lastSentDossierRef=d.ref;
-  box.innerHTML=`<div class="success"><strong>Dossier ajouté à l’espace conseiller de démonstration.</strong><br>Il est maintenant visible pour <strong>${esc(adv.firstName)} ${esc(adv.lastName)}</strong>, ${esc(inst.name)}.<br><span class="hint">Dans une version connectée, cette action transmettrait le dossier au compte du conseiller sélectionné.</span><br><br>Référence : <span class="codebox">${esc(d.ref)}</span></div>`;window.scrollTo({top:0,behavior:"smooth"});
+  const privacyNote=d.disabilityDataWithheld
+    ?"Les informations de handicap et d’impacts fonctionnels n’ont pas été ajoutées au dossier conseiller."
+    :"Le partage des informations de handicap avec le conseiller a été autorisé.";
+  box.innerHTML=`<div class="success"><strong>Dossier ajouté à l’espace conseiller de démonstration.</strong><br>Il est maintenant visible pour <strong>${esc(adv.firstName)} ${esc(adv.lastName)}</strong>, ${esc(inst.name)}.<br><span class="hint">${esc(privacyNote)} Dans une version connectée, cette action transmettrait le dossier au compte du conseiller sélectionné.</span><br><br>Référence : <span class="codebox">${esc(d.ref)}</span></div>`;window.scrollTo({top:0,behavior:"smooth"});
 }
 function savePastJobs(){
   try{localStorage.setItem("justecapPastJobIds",JSON.stringify(selectedPastJobIds))}catch(e){}
@@ -835,7 +834,7 @@ function deleteDossier(ref){
 function openDossier(ref){
   const d=getDossiers().find(x=>x.ref===ref);if(!d)return;const inst=institutions.find(i=>i.id===d.institutionId),adv=inst?.advisors.find(a=>a.id===d.advisorId);
   document.getElementById("modalTitle").textContent=`${d.firstName} ${d.lastName}`;document.getElementById("modalSubtitle").textContent=`${d.ref} • ${new Date(d.date).toLocaleString("fr-FR")}`;
-  document.getElementById("modalBody").innerHTML=`<div class="details-grid"><div class="summary-card"><strong>Profil</strong><ul class="small-list"><li>Âge : ${d.age||"-"}</li><li>Handicap(s) : ${esc(labelsFrom(d.disabilitiesSelected,disabilityOptions).join(", ")||"Non renseigné")}</li><li>Impacts fonctionnels : ${esc(labelsFrom(d.functionalLimits,functionalLimitOptions).join(", ")||"Aucun renseigné")}</li><li>Bassin(s) d'emploi : ${esc((d.employmentAreas&&d.employmentAreas.length?d.employmentAreas.join(", "):d.employmentArea)||"Non renseigné")}</li><li>Établissement : ${esc(inst?.name||"Non renseigné")}</li><li>Conseiller : ${esc(adv?adv.firstName+" "+adv.lastName:"Non renseigné")}</li></ul></div><div class="summary-card"><strong>Savoir-faire</strong><ul class="small-list">${(d.skills||[]).map(x=>`<li>${esc(x)}</li>`).join("")||"<li>Aucun</li>"}</ul></div><div class="summary-card"><strong>Savoir-être</strong><ul class="small-list">${(d.soft||[]).map(x=>`<li>${esc(x)}</li>`).join("")||"<li>Aucun</li>"}</ul></div><div class="summary-card"><strong>Qualités</strong><ul class="small-list">${(d.qualitiesSelected||[]).map(x=>`<li>${qualityOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join("")||"<li>Aucune</li>"}</ul></div><div class="summary-card"><strong>Points de vigilance</strong><ul class="small-list">${(d.defectsSelected||[]).map(x=>`<li>${defectOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join("")||"<li>Aucun</li>"}</ul></div><div class="summary-card"><strong>Loisirs</strong><ul class="small-list">${(d.hobbiesSelected||[]).map(x=>`<li>${hobbyOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join("")||"<li>Aucun</li>"}</ul></div><div class="summary-card"><strong>Conditions déjà pratiquées</strong><ul class="small-list">${(d.experienceSelected||[]).map(x=>`<li>${experienceOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join("")||"<li>Aucune</li>"}</ul></div><div class="summary-card"><strong>Résultats</strong><ol class="small-list">${(d.results||[]).map(r=>`<li>${esc(r.title)} : <strong>${esc(r.score)}%</strong>${r.marketIndex?` • indice local démo ${esc(r.marketIndex)}/100 (${esc(r.marketLabel||"")})`:""}</li>`).join("")}</ol></div></div><div class="actions" style="justify-content:flex-end"><button class="btn secondary" onclick="downloadDossier('${d.ref}')">Télécharger ce dossier</button><button class="btn secondary" onclick="printDossier('${d.ref}')">Imprimer ce dossier</button><button class="btn danger" onclick="deleteDossier('${d.ref}')">Supprimer ce dossier</button></div>`;
+  document.getElementById("modalBody").innerHTML=`<div class="details-grid"><div class="summary-card"><strong>Profil</strong><ul class="small-list"><li>Âge : ${d.age||"-"}</li><li>Handicap(s) : ${esc(dossierDisabilityText(d))}</li><li>Impacts fonctionnels : ${esc(dossierFunctionalText(d))}</li><li>Bassin(s) d'emploi : ${esc((d.employmentAreas&&d.employmentAreas.length?d.employmentAreas.join(", "):d.employmentArea)||"Non renseigné")}</li><li>Établissement : ${esc(inst?.name||"Non renseigné")}</li><li>Conseiller : ${esc(adv?adv.firstName+" "+adv.lastName:"Non renseigné")}</li></ul></div><div class="summary-card"><strong>Savoir-faire</strong><ul class="small-list">${(d.skills||[]).map(x=>`<li>${esc(x)}</li>`).join("")||"<li>Aucun</li>"}</ul></div><div class="summary-card"><strong>Savoir-être</strong><ul class="small-list">${(d.soft||[]).map(x=>`<li>${esc(x)}</li>`).join("")||"<li>Aucun</li>"}</ul></div><div class="summary-card"><strong>Qualités</strong><ul class="small-list">${(d.qualitiesSelected||[]).map(x=>`<li>${qualityOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join("")||"<li>Aucune</li>"}</ul></div><div class="summary-card"><strong>Points de vigilance</strong><ul class="small-list">${(d.defectsSelected||[]).map(x=>`<li>${defectOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join("")||"<li>Aucun</li>"}</ul></div><div class="summary-card"><strong>Loisirs</strong><ul class="small-list">${(d.hobbiesSelected||[]).map(x=>`<li>${hobbyOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join("")||"<li>Aucun</li>"}</ul></div><div class="summary-card"><strong>Conditions déjà pratiquées</strong><ul class="small-list">${(d.experienceSelected||[]).map(x=>`<li>${experienceOptions.find(h=>h[0]===x)?.[1]||x}</li>`).join("")||"<li>Aucune</li>"}</ul></div><div class="summary-card"><strong>Résultats</strong><ol class="small-list">${(d.results||[]).map(r=>`<li>${esc(r.title)} : <strong>${esc(r.score)}%</strong>${r.marketIndex?` • indice local démo ${esc(r.marketIndex)}/100 (${esc(r.marketLabel||"")})`:""}</li>`).join("")}</ol></div></div><div class="actions" style="justify-content:flex-end"><button class="btn secondary" onclick="downloadDossier('${d.ref}')">Télécharger ce dossier</button><button class="btn secondary" onclick="printDossier('${d.ref}')">Imprimer ce dossier</button><button class="btn danger" onclick="deleteDossier('${d.ref}')">Supprimer ce dossier</button></div>`;
   document.getElementById("dossierModal").classList.add("open");
 }
 function closeModal(){document.getElementById("dossierModal").classList.remove("open")}
